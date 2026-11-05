@@ -6,3 +6,5 @@
 @media(prefers-color-scheme:dark){.tangent-line{stroke:#efa56e}.chart-legend .tangent-key:before{border-color:#efa56e}}
 .chart-data .axis{fill:none}
 .plot>path.axis{fill:none}
+.wave-toggles label{display:flex;align-items:center;gap:10px;min-height:44px;padding:5px 12px;border:1px solid var(--border);border-radius:8px}.wave-toggles input{width:22px;height:22px;accent-color:var(--accent)}.control select{display:block;width:100%;margin:8px 0}.probability-bar{fill:var(--accent);opacity:.65}.probability-bar.chosen{fill:#c16e38;opacity:1;stroke:var(--ink);stroke-width:1}.unit-outline{stroke:var(--muted);stroke-width:2;fill:none}.circle-radius{stroke:var(--ink);stroke-width:2;fill:none}.projection-guide{stroke:var(--muted);stroke-dasharray:3 5;fill:none}.circle-handle{cursor:grab;stroke-width:3}.unit-plot{touch-action:none}.live{white-space:nowrap}@media(prefers-color-scheme:dark){.probability-bar.chosen{fill:#efa56e}}
+.circle-hit{fill:transparent;stroke:none}

@@ -1,3 +1,4 @@
+import { chart, path, stat, watch } from './charts.js';
 import { futureValue, square, squareDerivative, tangentValue, flipCoins } from './math.js';
 
 export const extraConcepts = [
@@ -8,7 +9,7 @@ export const extraConcepts = [
     equation: 'FV = PV(1 + r)<sup>t</sup>',
     what: 'With annual compounding, interest is added to the balance once each year. PV is the initial principal, r is the annual rate as a decimal, and t is the number of years.',
     useful: 'Comparing savings and long-term investment scenarios. This model assumes a constant rate, with no deposits, withdrawals, fees, or taxes.',
-    related: 'Exponential growth · Derivatives'
+    related: 'Exponential Growth & Decay · Derivatives'
   },
   {
     id: 'derivatives', title: 'Derivatives', category: 'Functions',
@@ -35,34 +36,6 @@ const compactMoney = value => '$' + new Intl.NumberFormat('en-US', { notation: '
 const number = value => Number(value.toFixed(2)).toString();
 const $ = selector => document.querySelector(selector);
 
-// One responsive coordinate system for the new charts. Labels keep their size on phones.
-function chart({ xmin = 0, xmax, ymin = 0, ymax, formatY = number, xLabel }) {
-  const svg = $('.plot');
-  const width = Math.max(280, Math.round(svg.clientWidth));
-  svg.setAttribute('viewBox', `0 0 ${width} 340`);
-  const left = 62, right = width - 24, top = 24, bottom = 290;
-  const x = v => left + (v - xmin) / (xmax - xmin) * (right - left);
-  const y = v => bottom - (v - ymin) / (ymax - ymin) * (bottom - top);
-  let grid = '';
-  for (let i = 0; i <= 4; i++) {
-    const v = ymin + (ymax - ymin) * i / 4;
-    grid += `<path class="gridline" d="M${left} ${y(v)}H${right}"/><text x="${left - 8}" y="${y(v) + 4}" text-anchor="end">${formatY(v)}</text>`;
-  }
-  const ticks = width < 500 ? 2 : 4;
-  for (let i = 0; i <= ticks; i++) {
-    const v = xmin + (xmax - xmin) * i / ticks;
-    grid += `<path class="gridline" d="M${x(v)} ${top}V${bottom}"/><text x="${x(v)}" y="311" text-anchor="middle">${number(v)}</text>`;
-  }
-  svg.innerHTML = `<defs><clipPath id="chart-clip"><rect x="${left}" y="${top}" width="${right-left}" height="${bottom-top}"/></clipPath></defs>${grid}<path class="axis" d="M${left} ${top}V${bottom}H${right}"/><text x="${(left + right) / 2}" y="333" text-anchor="middle">${xLabel}</text><g class="chart-data" clip-path="url(#chart-clip)"></g>`;
-  return { svg, x, y, layer: $('.chart-data') };
-}
-const path = (points, x, y) => points.map(([a, b], i) => `${i ? 'L' : 'M'}${x(a)},${y(b)}`).join(' ');
-const stat = (label, id) => `<div><span>${label}</span><output id="${id}"></output></div>`;
-function watch(update) {
-  document.querySelectorAll('input[type=range]').forEach(input => input.addEventListener('input', update));
-  new ResizeObserver(update).observe($('.plot'));
-  update();
-}
 
 function interest({ slider, copy }) {
   $('#controls').innerHTML = `<div class="controls extra-controls">${slider('principal','Initial principal',100,100000,100,1000,'USD · initial investment')}${slider('rate','Annual interest rate',0,15,.1,5,'Annual compounding')}${slider('years','Time',1,50,1,20,'Years invested')}</div><div class="metrics" aria-live="polite">${stat('Final value','final-value')}${stat('Interest earned','interest-earned')}</div><div class="chart-legend"><span class="principal-key">Original principal</span><span class="interest-key">Accumulated interest</span></div>`;

@@ -6,10 +6,10 @@ with sync_playwright() as p:
  page=context.new_page(); errors=[]
  page.on('pageerror',lambda e: errors.append(str(e)))
  base=os.environ.get('MATH_REFERENCE_URL', 'http://localhost:8000/')
- page.goto(base); assert page.locator('.card').count()==6
+ page.goto(base); assert page.locator('.card').count()==11
  page.locator('#search').fill('normal');assert page.locator('.card').count()==1
  page.get_by_role('button',name='Functions',exact=True).click();assert page.locator('.card').count()==0
- page.locator('#search').fill('');assert page.locator('.card').count()==2
+ page.locator('#search').fill('');assert page.locator('.card').count()==6
  page.goto(base+'concept.html?concept=sigmoid')
  for name,value in [('steepness','-2'),('midpoint','3')]:
   before=page.locator('.curve').get_attribute('d');page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',value);assert before!=page.locator('.curve').get_attribute('d')
@@ -38,11 +38,11 @@ with sync_playwright() as p:
  page.locator('#source').select_option('1');page.locator('#target').select_option('2');page.get_by_role('button',name='Add edge',exact=True).click()
  page.locator('[data-edge="1-2"]').focus();page.keyboard.press('Enter');page.get_by_role('button',name='Remove selected').click();assert page.locator('[data-edge="1-2"]').count()==0
  page.get_by_role('button',name='Randomize network').click();assert page.locator('.vertex').count()==6
- # All new concepts are searchable, reachable, and share five sibling links.
+ # All new concepts are searchable, reachable, and share ten sibling links.
  for title, concept in [('Compound Interest','interest'),('Derivatives','derivatives'),('Probability & Coin Flips','coins')]:
   page.goto(base);page.locator('#search').fill(title);assert page.locator('.card').count()==1
   page.locator('.card').click();assert page.url.endswith('concept='+concept)
-  assert page.locator('.other-nav a').count()==5
+  assert page.locator('.other-nav a').count()==10
   assert page.locator('.plot > .axis').evaluate('(el)=>getComputedStyle(el).fill')=='none'
   assert not page.locator('details').evaluate('(el)=>el.open')
   page.locator('summary').click()
@@ -112,10 +112,10 @@ with sync_playwright() as p:
  page.set_viewport_size({'width':320,'height':740})
  for scheme in ['light','dark']:
   page.emulate_media(color_scheme=scheme)
-  for route in ['', 'concept.html?concept=sigmoid','concept.html?concept=normal','concept.html?concept=graph','concept.html?concept=interest','concept.html?concept=derivatives','concept.html?concept=coins']:
+  for route in ['', 'concept.html?concept=sigmoid','concept.html?concept=normal','concept.html?concept=graph','concept.html?concept=interest','concept.html?concept=derivatives','concept.html?concept=coins','concept.html?concept=trigonometric','concept.html?concept=exponential','concept.html?concept=logarithmic','concept.html?concept=binomial','concept.html?concept=unit-circle']:
    page.goto(base+route);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),route
  page.screenshot(path='/tmp/math-graph-mobile-dark.png',full_page=True)
  page.set_viewport_size({'width':1280,'height':900});page.goto(base);page.screenshot(path='/tmp/math-home-desktop.png',full_page=True)
  assert not errors, errors
- print('PASS: all six concepts; search/navigation; original interactions; compound interest extremes; tangent slopes; coin accounting/reset; touch sliders; clipboard; mobile light/dark layouts; no JavaScript errors')
+ print('PASS: all eleven concepts; search/navigation; original interactions; compound interest extremes; tangent slopes; coin accounting/reset; touch sliders; clipboard; mobile light/dark layouts; no JavaScript errors')
  browser.close()

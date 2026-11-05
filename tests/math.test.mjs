@@ -30,3 +30,49 @@ test('coin batches record every trial and accumulate exact counts', () => {
   assert.ok(state.history.every(p=>p>=0&&p<=1));
   const tails={flips:0,heads:0,history:[]};flipCoins(tails,100,()=>.5);assert.equal(tails.heads,0);
 });
+
+const { sineWave, cosineWave, exponential, logarithm, binomialProbability, circleCoordinates } = await import('../assets/math.js');
+const near = (actual,expected,tolerance=1e-10) => assert.ok(Math.abs(actual-expected)<tolerance, `${actual} ≠ ${expected}`);
+test('trigonometric amplitude, phase, frequency and period',()=>{
+  near(sineWave(0,3,2,Math.PI/2),3);near(cosineWave(0,3,2,Math.PI/2),0);
+  for(const b of [.5,1,4])for(const c of [-2*Math.PI,0,2*Math.PI]){
+    near(sineWave(.7,2,b,c),sineWave(.7+2*Math.PI/b,2,b,c));
+    near(cosineWave(.7,2,b,c),2*Math.cos(b*.7+c));
+  }
+});
+test('exponential initial, constant, doubling and half-life values',()=>{
+  near(exponential(0,100,-1),100);near(exponential(20,100,0),100);
+  near(exponential(Math.log(2)/.2,10,.2),20);
+  near(exponential(Math.log(2)/.2,10,-.2),5);
+  near(exponential(20,100,1),100*Math.exp(20),.00001);
+  assert.ok(exponential(20,1,-1)>0);
+});
+test('logarithm domain and base constraints and inverse relationship',()=>{
+  for(const base of [2,Math.E,10]){
+    near(logarithm(1,base),0);near(logarithm(base,base),1);
+    for(const x of [.001,.5,2,20])near(base**logarithm(x,base),x);
+  }
+  for(const x of [0,-1])assert.ok(Number.isNaN(logarithm(x,2)));
+  for(const b of [-2,0,1])assert.ok(Number.isNaN(logarithm(2,b)));
+});
+test('binomial normalization, mean, variance and endpoint masses for all trial counts',()=>{
+  near(binomialProbability(10,.5,5),.24609375);
+  for(let n=1;n<=50;n++)for(const p of [0,.01,.2,.5,.99,1]){
+    const pmf=Array.from({length:n+1},(_,k)=>binomialProbability(n,p,k));
+    near(pmf.reduce((a,b)=>a+b,0),1);
+    near(pmf.reduce((sum,v,k)=>sum+k*v,0),n*p);
+    near(pmf.reduce((sum,v,k)=>sum+(k-n*p)**2*v,0),n*p*(1-p));
+    assert.ok(pmf.every(v=>Number.isFinite(v)&&v>=0&&v<=1));
+    if(p===0)assert.equal(pmf[0],1);
+    if(p===1)assert.equal(pmf[n],1);
+  }
+});
+test('unit circle cardinal angles, radians, quadrants and radius',()=>{
+  for(const [a,x,y] of [[0,1,0],[90,0,1],[180,-1,0],[270,0,-1],[360,1,0]]){
+    const point=circleCoordinates(a);near(point.x,x);near(point.y,y);near(point.radians,a*Math.PI/180);
+  }
+  for(let a=0;a<=360;a++){
+    const {x,y}=circleCoordinates(a);near(x*x+y*y,1);
+  }
+  const {x,y}=circleCoordinates(225);assert.ok(x<0&&y<0);
+});

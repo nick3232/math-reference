@@ -19,3 +19,25 @@ export function flipCoins(state, count, random = Math.random) {
   }
   return state;
 }
+
+export const sineWave = (x, amplitude, frequency, phase) => amplitude * Math.sin(frequency * x + phase);
+export const cosineWave = (x, amplitude, frequency, phase) => amplitude * Math.cos(frequency * x + phase);
+export const exponential = (x, initial, rate) => initial * Math.exp(rate * x);
+export function logarithm(x, base) {
+  if (!(x > 0) || !(base > 0) || base === 1) return NaN;
+  return Math.log(x) / Math.log(base);
+}
+// Multiplicative coefficients are safe for n <= 50; endpoints avoid 0^0 ambiguity.
+export function binomialProbability(n, p, k) {
+  if (!Number.isInteger(n) || !Number.isInteger(k) || n < 0 || k < 0 || k > n || p < 0 || p > 1) return 0;
+  if (p === 0) return k === 0 ? 1 : 0;
+  if (p === 1) return k === n ? 1 : 0;
+  let coefficient = 1;
+  for (let i = 1; i <= Math.min(k, n-k); i++) coefficient *= (n-i+1)/i;
+  return coefficient * p ** k * (1-p) ** (n-k);
+}
+export function circleCoordinates(degrees) {
+  const radians = degrees * Math.PI / 180;
+  const clean = value => Math.abs(value) < 1e-12 ? 0 : value;
+  return { x: clean(Math.cos(radians)), y: clean(Math.sin(radians)), radians };
+}
