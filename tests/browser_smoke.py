@@ -6,10 +6,10 @@ with sync_playwright() as p:
  page=context.new_page(); errors=[]
  page.on('pageerror',lambda e: errors.append(str(e)))
  base=os.environ.get('MATH_REFERENCE_URL', 'http://localhost:8000/')
- page.goto(base); assert page.locator('.card').count()==3
+ page.goto(base); assert page.locator('.card').count()==6
  page.locator('#search').fill('normal');assert page.locator('.card').count()==1
  page.get_by_role('button',name='Functions',exact=True).click();assert page.locator('.card').count()==0
- page.locator('#search').fill('');assert page.locator('.card').count()==1
+ page.locator('#search').fill('');assert page.locator('.card').count()==2
  page.goto(base+'concept.html?concept=sigmoid')
  for name,value in [('steepness','-2'),('midpoint','3')]:
   before=page.locator('.curve').get_attribute('d');page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',value);assert before!=page.locator('.curve').get_attribute('d')
@@ -38,13 +38,84 @@ with sync_playwright() as p:
  page.locator('#source').select_option('1');page.locator('#target').select_option('2');page.get_by_role('button',name='Add edge',exact=True).click()
  page.locator('[data-edge="1-2"]').focus();page.keyboard.press('Enter');page.get_by_role('button',name='Remove selected').click();assert page.locator('[data-edge="1-2"]').count()==0
  page.get_by_role('button',name='Randomize network').click();assert page.locator('.vertex').count()==6
+ # All new concepts are searchable, reachable, and share five sibling links.
+ for title, concept in [('Compound Interest','interest'),('Derivatives','derivatives'),('Probability & Coin Flips','coins')]:
+  page.goto(base);page.locator('#search').fill(title);assert page.locator('.card').count()==1
+  page.locator('.card').click();assert page.url.endswith('concept='+concept)
+  assert page.locator('.other-nav a').count()==5
+  assert page.locator('.plot > .axis').evaluate('(el)=>getComputedStyle(el).fill')=='none'
+  assert not page.locator('details').evaluate('(el)=>el.open')
+  page.locator('summary').click()
+  for link in page.locator('.info-content a').all():
+   assert page.request.get(base+link.get_attribute('href')).ok
+ def set_slider(name,value):
+  page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',str(value))
+ page.goto(base+'concept.html?concept=interest')
+ expect(page.locator('#final-value')).to_have_text('$2,653.30')
+ before=page.locator('.curve').get_attribute('d');set_slider('rate',0)
+ assert before!=page.locator('.curve').get_attribute('d')
+ expect(page.locator('#interest-earned')).to_have_text('$0.00')
+ expect(page.locator('#final-value')).to_have_text('$1,000.00')
+ for name,value in [('principal',100000),('rate',15),('years',50)]:set_slider(name,value)
+ expect(page.locator('#final-value')).to_have_text('$108,365,744.16')
+ assert page.locator('.principal-area').count()==1
+ set_slider('rate',5.1);page.get_by_role('button',name='Copy equation').click()
+ expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
+ assert '0.051' in page.evaluate('navigator.clipboard.readText()')
+ for name,value in [('principal',100),('rate',0),('years',1)]:set_slider(name,value)
+ expect(page.locator('#final-value')).to_have_text('$100.00')
+ page.goto(base+'concept.html?concept=derivatives')
+ for value in [-5,0,5]:
+  set_slider('point',value)
+  expect(page.locator('#point-y')).to_have_text(str(value*value))
+  expect(page.locator('#point-slope')).to_have_text(str(2*value))
+  assert page.locator('.tangent-line').count()==1;assert page.locator('.selected-point').count()==1
+ for button,text in [('Copy function','f(x) = x^2'),('Copy derivative',"f'(x) = 2x")]:
+  page.get_by_role('button',name=button,exact=True).click()
+  expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
+  assert page.evaluate('navigator.clipboard.readText()')==text
+ # Deterministic RNG in the browser verifies exact experimental percentages and history.
+ page.goto(base+'concept.html?concept=coins')
+ expect(page.locator('#heads-percent')).to_have_text('—')
+ assert page.locator('.curve').count()==0;assert page.locator('.reference-line').count()==1
+ page.evaluate('Math.random = () => 0.25')
+ page.get_by_role('button',name='Flip once',exact=True).click()
+ expect(page.locator('#heads-percent')).to_have_text('100.00%')
+ page.evaluate('Math.random = () => 0.75')
+ page.get_by_role('button',name='Flip 10 times',exact=True).click()
+ expect(page.locator('#heads-percent')).to_have_text('9.09%')
+ page.evaluate('Math.random = () => 0.25')
+ page.get_by_role('button',name='Flip 100 times',exact=True).click()
+ expect(page.locator('#total-flips')).to_have_text('111')
+ expect(page.locator('#heads')).to_have_text('101');expect(page.locator('#tails')).to_have_text('10')
+ expect(page.locator('#heads-percent')).to_have_text('90.99%')
+ assert page.locator('.curve').get_attribute('d').count('L')==110
+ page.get_by_role('button',name='Reset simulation').click()
+ for key in ['total-flips','heads','tails']:expect(page.locator('#'+key)).to_have_text('0')
+ expect(page.locator('#heads-percent')).to_have_text('—')
+ # Real randomized batches keep exact accounting and valid probabilities.
+ page.reload()
+ for _ in range(10):page.get_by_role('button',name='Flip 100 times',exact=True).click()
+ heads=int(page.locator('#heads').inner_text().replace(',',''));tails=int(page.locator('#tails').inner_text().replace(',',''))
+ assert heads+tails==1000
+ assert abs(float(page.locator('#heads-percent').inner_text().strip('%'))-heads/10)<.011
+ # Touch-enabled native sliders on both new slider pages.
+ touch=context.browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True)
+ touch_page=touch.new_page()
+ for concept,names in [('interest',['principal','rate','years']),('derivatives',['point'])]:
+  touch_page.goto(base+'concept.html?concept='+concept)
+  for name in names:
+   slider=touch_page.locator('#'+name);before=slider.input_value();box=slider.bounding_box()
+   slider.tap(position={'x':box['width']*.8,'y':box['height']/2})
+   assert slider.input_value()!=before
+ touch.close()
  page.set_viewport_size({'width':320,'height':740})
  for scheme in ['light','dark']:
   page.emulate_media(color_scheme=scheme)
-  for route in ['', 'concept.html?concept=sigmoid','concept.html?concept=normal','concept.html?concept=graph']:
+  for route in ['', 'concept.html?concept=sigmoid','concept.html?concept=normal','concept.html?concept=graph','concept.html?concept=interest','concept.html?concept=derivatives','concept.html?concept=coins']:
    page.goto(base+route);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),route
  page.screenshot(path='/tmp/math-graph-mobile-dark.png',full_page=True)
  page.set_viewport_size({'width':1280,'height':900});page.goto(base);page.screenshot(path='/tmp/math-home-desktop.png',full_page=True)
  assert not errors, errors
- print('PASS: search, filters, curves, shading, clipboard, graph edits/drag/keyboard/export, mobile light/dark overflow, no JavaScript errors')
+ print('PASS: all six concepts; search/navigation; original interactions; compound interest extremes; tangent slopes; coin accounting/reset; touch sliders; clipboard; mobile light/dark layouts; no JavaScript errors')
  browser.close()
