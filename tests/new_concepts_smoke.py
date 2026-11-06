@@ -18,12 +18,12 @@ with sync_playwright() as p:
   page.locator('#copy').click();expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
   return page.evaluate('navigator.clipboard.readText()')
  page.goto(base)
- titles=page.locator('.card h3').all_text_contents();assert len(titles)==11
+ titles=page.locator('.card h3').all_text_contents();assert len(titles)==16
  # Search and real navigation for all eleven, plus working related links.
  for title in titles:
   page.goto(base);page.locator('#search').fill(title);expect(page.locator('.card')).to_have_count(1)
   page.locator('.card').click();expect(page.locator('h1')).to_have_text(title)
-  assert page.locator('.other-nav a').count()==10
+  assert page.locator('.other-nav a').count()==15
   assert not page.locator('details').evaluate('(el)=>el.open')
   page.locator('summary').click()
   links=[el.get_attribute('href') for el in page.locator('.info-content a').all()]
@@ -80,6 +80,7 @@ with sync_playwright() as p:
  assert '360 pi / 180' in copied()
  # Native pointer dragging uses the same coordinate conversion on desktop and touch.
  set_slider('angle',0)
+ page.locator('.plot').scroll_into_view_if_needed()
  coords=page.locator('.plot').evaluate('el=>{const m=el.getScreenCTM();return [[322,170],[200,48]].map(([x,y])=>{const p=new DOMPoint(x,y).matrixTransform(m);return {x:p.x,y:p.y}})}')
  page.mouse.move(**coords[0]);page.mouse.down();page.mouse.move(**coords[1],steps=5);page.mouse.up()
  expect(page.locator('#angle')).to_have_value('90')
@@ -109,5 +110,5 @@ with sync_playwright() as p:
      box=page.locator('.unit-outline').bounding_box();assert abs(box['width']-box['height'])<.01
     if width==390:page.screenshot(path='/tmp/math-'+concept+'-'+scheme+'.png',full_page=True)
  assert not errors,errors
- print('PASS: eleven-concept search/navigation; all five new interactions and copy actions; mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
+ print('PASS: sixteen-concept search/navigation; all five new interactions and copy actions; mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
  browser.close()

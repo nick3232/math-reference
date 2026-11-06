@@ -1,6 +1,6 @@
 # Math Reference
 
-A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes eleven concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, and Unit Circle. No dependencies or build step.
+A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes sixteen concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, and Logistic Growth. No dependencies or build step.
 
 ## Run locally
 
@@ -19,16 +19,18 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 ## Structure
 
 - `index.html`: library entry point.
-- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, or `unit-circle` selects the concept.
+- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, or `logistic` selects the concept.
 - `assets/styles.css`: responsive layouts, visualization styling, and automatic system light/dark themes.
 - `assets/app.js`: concept metadata, shared layout, search/category filtering, controls, SVG graphs, and network editor.
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
-- `assets/wave-concepts.js`: metadata and visualizations for the five newest concepts.
+- `assets/wave-concepts.js`: metadata and visualizations for trigonometric, exponential, logarithmic, binomial, and unit-circle concepts.
+- `assets/applied-concepts.js`: metadata and visualizations for integration, vectors, regression, Bayesian updating, and logistic populations.
 - `assets/charts.js`: shared responsive SVG coordinates, tick formatters, clipping, paths, metrics, and control initialization.
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
-- `tests/browser_smoke.py`: regression browser checks for the original six concepts and eleven-page mobile layouts.
-- `tests/new_concepts_smoke.py`: the five newest visualizations, all-concept search/navigation, copy actions, touch controls, and circle geometry; uses the same optional Playwright tooling.
+- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all sixteen mobile page layouts.
+- `tests/applied_concepts_smoke.py`: Batch 4 calculations, edge states, regression mouse/touch dragging and keyboard editing, copy/export, and four viewport widths in both themes.
+- `tests/new_concepts_smoke.py`: the Batch 3 visualizations, all-concept search/navigation, copy actions, touch controls, and circle geometry; uses the same optional Playwright tooling.
 
 To add a concept, extend the appropriate concept module’s metadata and initializer and register it in `app.js`. Reuse `charts.js` for Cartesian plots; specialized geometry such as the unit circle uses its own SVG coordinate system. Shared navigation, cards, information sections, and styling come from the common template.
 
@@ -54,7 +56,17 @@ Binomial Distribution supports 1–50 trials and probabilities from 0–1. The o
 
 Unit Circle supports 0°–360°, displays radians alongside sine/cosine, and allows mouse or touch dragging of the point. Equal SVG coordinate scales preserve a circular shape at all viewport sizes. The slider provides keyboard access and one-degree precision. Cardinal-angle numerical noise is removed from displayed coordinates.
 
-All five additions reuse existing categories and the collapsed explanation template. Related concepts become links only when the target exists. Equations can be copied; Desmos opens its calculator separately. There are no site dependencies or build steps.
+Pages reuse the existing categories and collapsed explanation template; Vector Addition introduces the Linear Algebra category. Related concepts become links only when the target exists. Equations can be copied; Desmos opens its calculator separately. There are no site dependencies or build steps.
+
+Integration & Riemann Sums uses x², 1–100 rectangles, and left/right/midpoint sampling. Lower bounds range −5–4 and upper bounds −4–5 in steps of 0.1. Moving a bound through the other moves the other bound by 0.1 to retain a < b. The exact area is (b³−a³)/3 and the signed approximation error is approximate minus exact. No individual rectangle labels are drawn.
+
+Vector Addition uses magnitudes 0–10 and directions 0°–360°. The graph has equal x/y scaling and shows A, B, the resultant R, and a dashed copy of B starting at A’s tip. Components, resultant length, and direction update with sliders. A zero resultant’s direction is undefined. Direct endpoint dragging is not implemented.
+
+Linear Regression starts with ten deterministic points in a 0–10 plot. Drag with mouse/touch, or focus a point with Tab and use arrow keys (0.1 increments). Editing is limited to 0.05–9.95 with 0.01 drag precision. New sample generates new y values; Reset restores the original dataset. Optional residuals are vertical distances to the fitted line. Centered least-squares sums calculate slope/intercept, Pearson r, and R² = r². Tiny x variance (sum of squared deviations ≤ 1e−10) makes the fit unavailable; constant y permits a horizontal line but leaves r and R² undefined. Copy fit & data exports JSON, using null for undefined values. Edits are session-only.
+
+Bayes’ Theorem models a screening test with prior, sensitivity, and specificity each adjustable over 0–100%. The first two bars use the entire population as their denominator; the final bar normalizes to positive tests only. True- and false-positive metrics remain shares of the overall population. If the probability of a positive result is zero, the posterior is explicitly undefined. This is a simplified educational screening model.
+
+Logistic Growth uses positive initial populations 1–1,000, carrying capacities 100–10,000, intrinsic rates 0–1, and horizons 1–100. It shows the capacity reference and final population. Rate zero or P₀ = K is constant; P₀ > K declines toward capacity. The optional unrestricted-exponential comparison is not included; the existing Exponential Growth & Decay page is linked for comparison.
 
 ## Checks
 
@@ -63,6 +75,7 @@ node --test tests/math.test.mjs
 # With the static server running and optional Python Playwright tooling:
 python3 tests/browser_smoke.py
 python3 tests/new_concepts_smoke.py
+python3 tests/applied_concepts_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.

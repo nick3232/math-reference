@@ -76,3 +76,48 @@ test('unit circle cardinal angles, radians, quadrants and radius',()=>{
   }
   const {x,y}=circleCoordinates(225);assert.ok(x<0&&y<0);
 });
+
+const {riemannSquare,addVectors,linearRegression,bayesPositive,logisticPopulation}=await import('../assets/math.js');
+test('Riemann sums: all methods, signed error, negative bounds and convergence',()=>{
+  near(riemannSquare(0,3,1,'left').approximate,0);
+  near(riemannSquare(0,3,1,'right').approximate,27);
+  near(riemannSquare(0,3,1,'midpoint').approximate,6.75);
+  for(const [a,b] of [[0,3],[-3,-1],[-2,3]])for(const method of ['left','right','midpoint']){
+    const coarse=riemannSquare(a,b,10,method),fine=riemannSquare(a,b,100,method);
+    near(fine.exact,(b**3-a**3)/3);near(fine.error,fine.approximate-fine.exact);
+    assert.ok(Math.abs(fine.error)<Math.abs(coarse.error));
+    assert.equal(fine.rectangles.length,100);
+  }
+});
+test('vector sums: components, quadrants, magnitude and zero direction',()=>{
+  const v=addVectors(3,0,4,90);near(v.x,3);near(v.y,4);near(v.magnitude,5);near(v.direction,53.13010235415598);
+  const zero=addVectors(10,0,10,180);near(zero.magnitude,0);assert.equal(zero.direction,null);
+  assert.equal(addVectors(0,180,0,270).direction,null);
+  const third=addVectors(3,180,4,270);near(third.direction,233.13010235415598);
+  near(addVectors(10,360,10,360).magnitude,20);
+});
+test('least squares: known fit, imperfect fit, negative correlation and degenerate data',()=>{
+  const exact=linearRegression([0,1,2,3].map(x=>({x,y:2*x+1})));
+  near(exact.slope,2);near(exact.intercept,1);near(exact.r,1);near(exact.rSquared,1);
+  const imperfect=linearRegression([{x:1,y:1},{x:2,y:2},{x:3,y:2}]);
+  near(imperfect.slope,.5);near(imperfect.intercept,2/3);near(imperfect.r,Math.sqrt(.75));near(imperfect.rSquared,.75);
+  near(linearRegression([{x:0,y:5},{x:1,y:3},{x:2,y:1}]).r,-1);
+  const constantY=linearRegression([{x:0,y:2},{x:1,y:2}]);near(constantY.slope,0);near(constantY.intercept,2);assert.equal(constantY.r,null);assert.equal(constantY.rSquared,null);
+  for(const data of [[{x:1,y:2},{x:1,y:3}],[{x:1,y:2},{x:1+1e-8,y:5}]]){
+    const fit=linearRegression(data);assert.equal(fit.slope,null);assert.equal(fit.intercept,null);assert.equal(fit.r,null);
+  }
+});
+test('Bayesian screening: base rates, endpoints and impossible positive results',()=>{
+  const result=bayesPositive(.01,.99,.95);near(result.truePositive,.0099);near(result.falsePositive,.0495);near(result.posterior,1/6);
+  assert.ok(bayesPositive(.5,.99,.95).posterior>result.posterior);
+  near(bayesPositive(.2,1,1).posterior,1);near(bayesPositive(0,.9,.9).posterior,0);near(bayesPositive(1,.9,.9).posterior,1);
+  assert.equal(bayesPositive(0,1,1).posterior,null);assert.equal(bayesPositive(1,0,0).posterior,null);
+});
+test('logistic growth: initial condition, limits, zero rate and above-capacity decline',()=>{
+  near(logisticPopulation(0,50,.2,1000),50);near(logisticPopulation(100,50,0,1000),50);
+  near(logisticPopulation(100,1000,.2,1000),1000);
+  let last=50;for(let t=1;t<=100;t++){const p=logisticPopulation(t,50,.2,1000);assert.ok(p>=last&&p<=1000);last=p;}
+  near(logisticPopulation(100,50,1,1000),1000);
+  assert.ok(logisticPopulation(10,1000,.2,100)<1000);assert.ok(logisticPopulation(10,1000,.2,100)>100);
+  for(const initial of [1,1000])for(const capacity of [100,10000])assert.ok(Number.isFinite(logisticPopulation(100,initial,1,capacity)));
+});
