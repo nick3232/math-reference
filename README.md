@@ -37,7 +37,7 @@ To add a concept, extend the appropriate concept module’s metadata and initial
 
 ## Interaction
 
-Function controls update immediately. Normal shading shows μ ± σ (approximately 68.27% probability). Plots use an x range of −10 to 10; normal density scales vertically with σ. Copy equation exports the current parameter values; the Desmos link opens its calculator, where the equation can be pasted.
+Function controls update immediately. Normal shading shows μ ± σ (approximately 68.27% probability). Plots use an x range of −10 to 10; normal density scales vertically with σ. Copy equation exports the current parameter values.
 
 The network is a simple undirected graph. Drag vertices, or focus a vertex and use arrow keys. Select a vertex or edge and choose **Remove selected**. Removing a vertex also removes its incident edges. Add edges using the vertex selectors; loops and duplicate edges are rejected. Randomize replaces the network. Copy graph data exports JSON containing vertex IDs, visualization coordinates, and edge endpoints. Changes are session-only and reset on reload.
 
@@ -57,7 +57,7 @@ Binomial Distribution supports 1–50 trials and probabilities from 0–1. The o
 
 Unit Circle supports 0°–360°, displays radians alongside sine/cosine, and allows mouse or touch dragging of the point. Equal SVG coordinate scales preserve a circular shape at all viewport sizes. The slider provides keyboard access and one-degree precision. Cardinal-angle numerical noise is removed from displayed coordinates.
 
-Pages reuse the existing categories and collapsed explanation template; Vector Addition introduces the Linear Algebra category. Related concepts become links only when the target exists. Equations can be copied; Desmos opens its calculator separately. There are no site dependencies or build steps.
+Pages reuse the existing categories and collapsed explanation template; Vector Addition introduces the Linear Algebra category. Related concepts become links only when the target exists. Equations and their copy buttons share a compact block, with separate buttons for the function and derivative. Independent expressions are separated by layout spacing; clipboard success feedback and selectable-text fallback remain available. There are no site dependencies or build steps.
 
 Integration & Riemann Sums uses x², 1–100 rectangles, and left/right/midpoint sampling. Lower bounds range −5–4 and upper bounds −4–5 in steps of 0.1. Moving a bound through the other moves the other bound by 0.1 to retain a < b. The exact area is (b³−a³)/3 and the signed approximation error is approximate minus exact. No individual rectangle labels are drawn.
 
@@ -80,6 +80,7 @@ python3 tests/browser_smoke.py
 python3 tests/new_concepts_smoke.py
 python3 tests/applied_concepts_smoke.py
 python3 tests/navigation_touch_smoke.py
+python3 tests/equation_presentation_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.

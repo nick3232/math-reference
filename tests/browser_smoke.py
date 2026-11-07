@@ -18,7 +18,7 @@ with sync_playwright() as p:
  assert '-2' in page.evaluate('navigator.clipboard.readText()')
  page.screenshot(path='/tmp/math-sigmoid-mobile.png',full_page=True)
  page.evaluate("Object.defineProperty(navigator, 'clipboard', {value: {writeText: async () => {throw new Error('denied')}}})")
- page.get_by_role('button',name='Copy equation').click();expect(page.locator('.actions textarea')).to_be_visible();assert '-2' in page.locator('.actions textarea').input_value()
+ page.get_by_role('button',name='Copy equation').click();expect(page.locator('.equation-row textarea')).to_be_visible();assert '-2' in page.locator('.equation-row textarea').input_value()
  page.goto(base+'concept.html?concept=normal')
  for name,value in [('mean','4'),('deviation','.3')]:
   before=page.locator('.curve').get_attribute('d');page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',value);assert before!=page.locator('.curve').get_attribute('d')

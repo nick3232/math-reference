@@ -15,7 +15,7 @@ export const extraConcepts = [
     id: 'derivatives', title: 'Derivatives', category: 'Functions',
     intro: 'Move along a parabola and see its instantaneous rate of change as a tangent line.',
     description: 'Follow a tangent to discover the slope at a single point.',
-    equation: 'f(x) = x² &nbsp; · &nbsp; f′(x) = 2x',
+    equation: ['f(x) = x²', 'f′(x) = 2x'], copyLabels: ['Copy function', 'Copy derivative'],
     what: 'A derivative measures instantaneous rate of change. For f(x) = x², the tangent slope at x = a is 2a, and the tangent is y = a² + 2a(x − a).',
     useful: 'Understanding velocity, optimizing quantities, and measuring sensitivity in mathematical models.',
     related: 'Sigmoid Function · Compound Interest · Limits'
@@ -63,13 +63,8 @@ function interest({ slider, copy }) {
 
 function derivatives({ slider, copy }) {
   $('#controls').innerHTML = `<div class="controls extra-controls">${slider('point','Point x',-5,5,.1,1,'Move from negative to positive slope')}</div><div class="metrics" aria-live="polite">${stat('x-coordinate','point-x')}${stat('f(x) = x²','point-y')}${stat('Slope f′(x)','point-slope')}</div><div class="chart-legend"><span class="interest-key">Parabola</span><span class="tangent-key">Tangent line</span></div>`;
-  $('#copy').textContent = 'Copy function';
-  const derivativeCopy = document.createElement('button');
-  derivativeCopy.textContent = 'Copy derivative';
-  derivativeCopy.id = 'copy-derivative';
-  $('#copy').after(derivativeCopy);
   $('#copy').onclick = () => copy('f(x) = x^2');
-  derivativeCopy.onclick = () => copy("f'(x) = 2x");
+  $('#copy-derivative').onclick = () => copy("f'(x) = 2x");
   function update() {
     const at = +$('#point').value;
     $('#point-value').value = at.toFixed(1);

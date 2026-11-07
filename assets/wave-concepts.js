@@ -7,7 +7,7 @@ export const waveConcepts = [
     id:'trigonometric', title:'Trigonometric Functions', category:'Functions',
     intro:'Shape sine and cosine waves with amplitude, frequency, and phase.',
     description:'Compare two waves and explore what shapes their oscillations.',
-    equation:'y = A sin(Bx + C) &nbsp; · &nbsp; y = A cos(Bx + C)',
+    equation:['y = A sin(Bx + C)', 'y = A cos(Bx + C)'],
     what:'Amplitude A sets the peak height. Frequency multiplier B sets the period to 2π/B. Phase C shifts each wave horizontally by −C/B; positive C moves it left.',
     useful:'Modeling sound, alternating current, seasonal variation, and other periodic processes.',
     related:'Unit Circle · Derivatives'
@@ -43,7 +43,7 @@ export const waveConcepts = [
     id:'unit-circle', title:'Unit Circle', category:'Functions',
     intro:'Follow a point around a circle and see sine and cosine as coordinates.',
     description:'Connect angles, coordinates, sine, and cosine on a unit circle.',
-    equation:'x = cos(θ) &nbsp; · &nbsp; y = sin(θ) &nbsp; · &nbsp; x² + y² = 1',
+    equation:['x = cos(θ)', 'y = sin(θ)', 'x² + y² = 1'],
     what:'A unit circle has radius 1 and center (0, 0). Angles start on the positive x-axis and increase counterclockwise. At angle θ the point is (cos θ, sin θ); a full turn is 360° or 2π radians.',
     useful:'Understanding trigonometric signs and identities, circular motion, rotations, and periodic waves.',
     related:'Trigonometric Functions · Derivatives'
