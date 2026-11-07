@@ -25,6 +25,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
 - `assets/wave-concepts.js`: metadata and visualizations for trigonometric, exponential, logarithmic, binomial, and unit-circle concepts.
 - `assets/applied-concepts.js`: metadata and visualizations for integration, vectors, regression, Bayesian updating, and logistic populations.
+- `assets/touch.js`: scoped touch handling for draggable SVG handles, preserving page scrolling on plot backgrounds.
 - `assets/charts.js`: shared responsive SVG coordinates, tick formatters, clipping, paths, metrics, and control initialization.
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
@@ -68,6 +69,8 @@ Bayes’ Theorem models a screening test with prior, sensitivity, and specificit
 
 Logistic Growth uses positive initial populations 1–1,000, carrying capacities 100–10,000, intrinsic rates 0–1, and horizons 1–100. It shows the capacity reference and final population. Rate zero or P₀ = K is constant; P₀ > K declines toward capacity. The optional unrestricted-exponential comparison is not included; the existing Exponential Growth & Decay page is linked for comparison.
 
+Concept pages return to the directory through **All concepts** near the top; related links remain in the collapsed explanation. Empty areas of the Unit Circle, network, and regression plots allow normal page scrolling. Only draggable points/vertices reserve touch gestures for manipulation.
+
 ## Checks
 
 ```sh
@@ -76,6 +79,7 @@ node --test tests/math.test.mjs
 python3 tests/browser_smoke.py
 python3 tests/new_concepts_smoke.py
 python3 tests/applied_concepts_smoke.py
+python3 tests/navigation_touch_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.

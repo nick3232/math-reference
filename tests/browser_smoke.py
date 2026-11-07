@@ -38,11 +38,11 @@ with sync_playwright() as p:
  page.locator('#source').select_option('1');page.locator('#target').select_option('2');page.get_by_role('button',name='Add edge',exact=True).click()
  page.locator('[data-edge="1-2"]').focus();page.keyboard.press('Enter');page.get_by_role('button',name='Remove selected').click();assert page.locator('[data-edge="1-2"]').count()==0
  page.get_by_role('button',name='Randomize network').click();assert page.locator('.vertex').count()==6
- # All new concepts are searchable, reachable, and share ten sibling links.
+ # All new concepts are searchable, reachable, and omit the removed bottom directory.
  for title, concept in [('Compound Interest','interest'),('Derivatives','derivatives'),('Probability & Coin Flips','coins')]:
   page.goto(base);page.locator('#search').fill(title);assert page.locator('.card').count()==1
   page.locator('.card').click();assert page.url.endswith('concept='+concept)
-  assert page.locator('.other-nav a').count()==15
+  assert page.locator('.other-nav').count()==0
   expect(page.locator('.plot > .axis')).to_have_css('fill','none')
   assert not page.locator('details').evaluate('(el)=>el.open')
   page.locator('summary').click()

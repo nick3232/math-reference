@@ -1,3 +1,4 @@
+import { reserveHandleTouch } from './touch.js';
 import { chart, path, stat, watch } from './charts.js';
 import { sineWave, cosineWave, exponential, logarithm, binomialProbability, circleCoordinates } from './math.js';
 
@@ -136,6 +137,7 @@ function binomial({slider,copy}) {
 function unitCircle({slider,copy}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('angle','Angle θ',0,360,1,45,'Counterclockwise from positive x')}</div>${metrics(stat('Angle (radians)','angle-radians')+stat('cos θ = x','circle-cos')+stat('sin θ = y','circle-sin'))}<div class="chart-legend"><span class="interest-key">Cosine · horizontal</span><span class="tangent-key">Sine · vertical</span></div>`;
   const svg=$('.plot');svg.classList.add('unit-plot');svg.setAttribute('viewBox','0 0 400 340');
+  reserveHandleTouch(svg, '.circle-handle');
   const cx=200,cy=170,r=122;
   let equation;
   function update() {

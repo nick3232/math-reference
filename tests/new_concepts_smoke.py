@@ -23,7 +23,7 @@ with sync_playwright() as p:
  for title in titles:
   page.goto(base);page.locator('#search').fill(title);expect(page.locator('.card')).to_have_count(1)
   page.locator('.card').click();expect(page.locator('h1')).to_have_text(title)
-  assert page.locator('.other-nav a').count()==15
+  assert page.locator('.other-nav').count()==0
   assert not page.locator('details').evaluate('(el)=>el.open')
   page.locator('summary').click()
   links=[el.get_attribute('href') for el in page.locator('.info-content a').all()]

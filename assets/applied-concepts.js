@@ -1,3 +1,4 @@
+import { reserveHandleTouch } from './touch.js';
 import { chart, path, stat, watch } from './charts.js';
 import { riemannSquare, addVectors, linearRegression, bayesPositive, logisticPopulation } from './math.js';
 
@@ -88,6 +89,7 @@ const defaultPoints = ()=>[.7,1.6,2.5,3.4,4.3,5.2,6.1,7,7.9,8.8].map((x,i)=>({x,
 function regression({copy}) {
   let points=defaultPoints(),selected=0,dragging=false,geometry,fit;
   const svg=$('.plot');svg.classList.add('regression-plot');svg.setAttribute('role','group');
+  reserveHandleTouch(svg, '.regression-point');
   $('#controls').innerHTML=`<div class="network-tools"><button id="new-sample">New sample dataset</button><button id="reset-data">Reset dataset</button><label class="residual-toggle"><input type="checkbox" id="residuals"> Show residuals</label></div>${metrics(stat('Slope m','regression-slope')+stat('Intercept b','regression-intercept')+stat('Correlation r','regression-r')+stat('R²','regression-r2'))}<p class="status" id="regression-status" role="status">Drag points, or focus a point and use arrow keys.</p>`;
   function update() {
     fit=linearRegression(points);
