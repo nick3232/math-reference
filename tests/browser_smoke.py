@@ -2,7 +2,7 @@ from playwright.sync_api import sync_playwright, expect
 import json, os, shutil
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
- context=browser.new_context(viewport={'width':390,'height':844},permissions=['clipboard-read','clipboard-write'])
+ context=browser.new_context(viewport={'width':390,'height':844})
  page=context.new_page(); errors=[]
  page.on('pageerror',lambda e: errors.append(str(e)))
  base=os.environ.get('MATH_REFERENCE_URL', 'http://localhost:8000/')
@@ -14,16 +14,11 @@ with sync_playwright() as p:
  for name,value in [('steepness','-2'),('midpoint','3')]:
   before=page.locator('.curve').get_attribute('d');page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',value);assert before!=page.locator('.curve').get_attribute('d')
  assert not page.locator('details').evaluate('(el)=>el.open')
- page.get_by_role('button',name='Copy equation').click();expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
- assert '-2' in page.evaluate('navigator.clipboard.readText()')
  page.screenshot(path='/tmp/math-sigmoid-mobile.png',full_page=True)
- page.evaluate("Object.defineProperty(navigator, 'clipboard', {value: {writeText: async () => {throw new Error('denied')}}})")
- page.get_by_role('button',name='Copy equation').click();expect(page.locator('.equation-row textarea')).to_be_visible();assert '-2' in page.locator('.equation-row textarea').input_value()
  page.goto(base+'concept.html?concept=normal')
  for name,value in [('mean','4'),('deviation','.3')]:
   before=page.locator('.curve').get_attribute('d');page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',value);assert before!=page.locator('.curve').get_attribute('d')
  assert page.locator('.area').count()==1;assert '68.27%' in page.locator('#stat').inner_text()
- page.get_by_role('button',name='Copy equation').click();expect(page.locator('#copy-status')).to_have_text('Copied to clipboard');assert '0.3' in page.evaluate('navigator.clipboard.readText()')
  page.goto(base+'concept.html?concept=graph')
  assert page.locator('.vertex').count()==6
  page.get_by_role('button',name='Add vertex',exact=True).click();assert page.locator('.vertex').count()==7
@@ -31,7 +26,6 @@ with sync_playwright() as p:
  page.get_by_role('button',name='Add edge',exact=True).click();assert 'already exists' in page.locator('#network-status').inner_text()
  page.locator('#target').select_option('1');page.get_by_role('button',name='Add edge',exact=True).click();assert 'different' in page.locator('#network-status').inner_text()
  node=page.locator('[data-id="7"]');before=node.get_attribute('transform');box=node.bounding_box();page.mouse.move(box['x']+box['width']/2,box['y']+box['height']/2);page.mouse.down();page.mouse.move(180,300);page.mouse.up();assert before!=page.locator('[data-id="7"]').get_attribute('transform')
- page.get_by_role('button',name='Copy graph data').click();expect(page.locator('#copy-status')).to_have_text('Copied to clipboard');data=json.loads(page.evaluate('navigator.clipboard.readText()'));assert len(data['vertices'])==7
  page.get_by_role('button',name='Remove selected').click();assert page.locator('.vertex').count()==6;assert page.locator('[data-edge="1-7"]').count()==0
  # Keyboard editing and explicit edge removal.
  node=page.locator('[data-id="1"]');node.focus();before=node.get_attribute('transform');page.keyboard.press('ArrowLeft');assert before!=page.locator('[data-id="1"]').get_attribute('transform')
@@ -59,9 +53,6 @@ with sync_playwright() as p:
  for name,value in [('principal',100000),('rate',15),('years',50)]:set_slider(name,value)
  expect(page.locator('#final-value')).to_have_text('$108,365,744.16')
  assert page.locator('.principal-area').count()==1
- set_slider('rate',5.1);page.get_by_role('button',name='Copy equation').click()
- expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
- assert '0.051' in page.evaluate('navigator.clipboard.readText()')
  for name,value in [('principal',100),('rate',0),('years',1)]:set_slider(name,value)
  expect(page.locator('#final-value')).to_have_text('$100.00')
  page.goto(base+'concept.html?concept=derivatives')
@@ -70,10 +61,6 @@ with sync_playwright() as p:
   expect(page.locator('#point-y')).to_have_text(str(value*value))
   expect(page.locator('#point-slope')).to_have_text(str(2*value))
   assert page.locator('.tangent-line').count()==1;assert page.locator('.selected-point').count()==1
- for button,text in [('Copy function','f(x) = x^2'),('Copy derivative',"f'(x) = 2x")]:
-  page.get_by_role('button',name=button,exact=True).click()
-  expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
-  assert page.evaluate('navigator.clipboard.readText()')==text
  # Deterministic RNG in the browser verifies exact experimental percentages and history.
  page.goto(base+'concept.html?concept=coins')
  expect(page.locator('#heads-percent')).to_have_text('—')
@@ -106,7 +93,7 @@ with sync_playwright() as p:
   touch_page.goto(base+'concept.html?concept='+concept)
   for name in names:
    slider=touch_page.locator('#'+name);before=slider.input_value();box=slider.bounding_box()
-   slider.tap(position={'x':box['width']*.8,'y':box['height']/2})
+   slider.locator('..').locator('.range-gesture').tap(position={'x':box['width']*.8,'y':box['height']/2})
    assert slider.input_value()!=before
  touch.close()
  page.set_viewport_size({'width':320,'height':740})
@@ -117,5 +104,5 @@ with sync_playwright() as p:
  page.screenshot(path='/tmp/math-graph-mobile-dark.png',full_page=True)
  page.set_viewport_size({'width':1280,'height':900});page.goto(base);page.screenshot(path='/tmp/math-home-desktop.png',full_page=True)
  assert not errors, errors
- print('PASS: all sixteen concepts; search/navigation; original interactions; compound interest extremes; tangent slopes; coin accounting/reset; touch sliders; clipboard; mobile light/dark layouts; no JavaScript errors')
+ print('PASS: original concepts, numerical controls, graph editing, search, touch taps, and mobile themes')
  browser.close()

@@ -9,14 +9,11 @@ CONCEPTS = {
 base=os.environ.get('MATH_REFERENCE_URL','http://localhost:8000/')
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
- context=browser.new_context(viewport={'width':390,'height':844},permissions=['clipboard-read','clipboard-write'],has_touch=True,is_mobile=True)
+ context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True)
  page=context.new_page();errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
  def visit(concept):page.goto(base+'concept.html?concept='+concept)
  def set_slider(name,value):page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',str(value))
- def copied():
-  page.locator('#copy').click();expect(page.locator('#copy-status')).to_have_text('Copied to clipboard')
-  return page.evaluate('navigator.clipboard.readText()')
  page.goto(base)
  titles=page.locator('.card h3').all_text_contents();assert len(titles)==16
  # Search and real navigation for all eleven, plus working related links.
@@ -39,7 +36,6 @@ with sync_playwright() as p:
  for checkbox,curve in [('show-sine','sine-curve'),('show-cosine','cosine-curve')]:
   page.locator('#'+checkbox).uncheck();assert page.locator('.'+curve).count()==0
   page.locator('#'+checkbox).check();assert page.locator('.'+curve).count()==1
- assert '0.5 pi' in copied()
  visit('exponential')
  for k,expected,mode in [(0,'10','Constant'),(-1,'0.0005','Decay'),(1,'220,264.6579','Growth')]:
   set_slider('growth',k)
@@ -49,12 +45,10 @@ with sync_playwright() as p:
   if k>0:assert 'doubling' in page.locator('#growth-time').inner_text()
  set_slider('initial',100);set_slider('horizon',20)
  expect(page.locator('#growth-final')).to_have_text('4.85e+10')
- assert '100 e^(1x)' in copied()
  visit('logarithmic')
  assert page.locator('#base option').count()==3
  for value in ['2','e','10']:
   page.locator('#base').select_option(value)
-  assert 'ln('+value+')' in copied()
   assert 'x > 0' in page.locator('#stat').inner_text()
   assert '(1, 0)' in page.locator('.plot').text_content()
   assert not re.search('NaN|Infinity',page.locator('.curve').get_attribute('d'))
@@ -73,11 +67,9 @@ with sync_playwright() as p:
  set_slider('outcome',50);set_slider('trials',1)
  assert page.locator('#outcome').get_attribute('max')=='1';assert page.locator('#outcome').input_value()=='1'
  assert page.locator('.probability-bar.chosen').count()==1
- assert 'C(1,1)' in copied()
  visit('unit-circle')
  for a,x,y in [(0,'1','0'),(90,'0','1'),(180,'-1','0'),(270,'0','-1'),(360,'1','0')]:
   set_slider('angle',a);expect(page.locator('#circle-cos')).to_have_text(x);expect(page.locator('#circle-sin')).to_have_text(y)
- assert '360 pi / 180' in copied()
  # Native pointer dragging uses the same coordinate conversion on desktop and touch.
  set_slider('angle',0)
  page.locator('.plot').scroll_into_view_if_needed()
@@ -97,7 +89,7 @@ with sync_playwright() as p:
   visit(concept)
   for name in ids:
    control=page.locator('#'+name);control.scroll_into_view_if_needed();before=control.input_value();box=control.bounding_box()
-   control.tap(position={'x':box['width']*.8,'y':box['height']/2});assert before!=control.input_value()
+   control.locator('..').locator('.range-gesture').tap(position={'x':box['width']*.8,'y':box['height']/2});assert before!=control.input_value()
  # Layout and actual circle aspect ratio at phone, tablet, and desktop sizes.
  for width in [320,390,768,1280]:
   page.set_viewport_size({'width':width,'height':900})
@@ -110,5 +102,5 @@ with sync_playwright() as p:
      box=page.locator('.unit-outline').bounding_box();assert abs(box['width']-box['height'])<.01
     if width==390:page.screenshot(path='/tmp/math-'+concept+'-'+scheme+'.png',full_page=True)
  assert not errors,errors
- print('PASS: sixteen-concept search/navigation; all five new interactions and copy actions; mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
+ print('PASS: sixteen-concept search/navigation; all five new interactions and  mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
  browser.close()

@@ -47,9 +47,8 @@ const metrics = content=>`<div class="metrics" aria-live="polite">${content}</di
 const samples = (a,b,n,f)=>Array.from({length:n+1},(_,i)=>{const x=a+(b-a)*i/n;return [x,f(x)];});
 const label = (id,value)=>{$(`#${id}-value`).value=value;};
 
-function integration({slider,copy}) {
+function integration({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('rectangles','Rectangles n',1,100,1,10,'Finer partitions improve the approximation')}${slider('lower','Lower bound a',-5,4,.1,0,'Kept strictly below b')}${slider('upper','Upper bound b',-4,5,.1,3,'Kept strictly above a')}<div class="control"><label for="method">Approximation method</label><select id="method"><option value="left">Left</option><option value="right">Right</option><option value="midpoint" selected>Midpoint</option></select></div></div>${metrics(stat('Approximate integral','integral-approx')+stat('Exact integral','integral-exact')+stat('Error (approx − exact)','integral-error'))}<div class="chart-legend"><span class="interest-key">f(x) = x²</span><span class="rectangle-key">Approximation rectangles</span></div>`;
-  let equation;
   function update(event) {
     let a=+$('#lower').value,b=+$('#upper').value;
     if(a>=b){if(event?.target?.id==='upper')a=+(b-.1).toFixed(1);else b=+(a+.1).toFixed(1);$('#lower').value=a;$('#upper').value=b;}
@@ -61,15 +60,13 @@ function integration({slider,copy}) {
     const {svg,x,y,layer}=chart({xmin:min,xmax:max,ymax,formatY:fmt,xTicks:[a,(a+b)/2,b],xLabel:'x'});
     layer.innerHTML=result.rectangles.map(r=>`<rect class="riemann-rectangle" x="${x(r.x)}" y="${y(r.height)}" width="${x(r.x+r.width)-x(r.x)}" height="${y(0)-y(r.height)}"/>`).join('')+`<path class="curve" d="${path(samples(min,max,300,v=>v*v),x,y)}"/>`;
     svg.setAttribute('aria-label',`${count} ${method} rectangles under x squared, bounds ${a} to ${b}, approximation ${fmt(result.approximate)}, exact ${fmt(result.exact)}, signed error ${fmt(result.error)}.`);
-    equation=`Integral from ${a} to ${b} of x^2 dx = (${b}^3 - (${a})^3)/3 = ${result.exact}\n${method} Riemann sum (${count} rectangles) = ${result.approximate}`;
   }
-  $('#method').onchange=update;$('#copy').onclick=()=>copy(equation);watch(update);
+  $('#method').onchange=update;watch(update);
 }
 
-function vectors({slider,copy}) {
+function vectors({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('a-mag','Magnitude A',0,10,.1,4,'Length of A')}${slider('a-dir','Direction A',0,360,1,20,'Degrees counterclockwise from +x')}${slider('b-mag','Magnitude B',0,10,.1,3,'Length of B')}${slider('b-dir','Direction B',0,360,1,100,'Degrees counterclockwise from +x')}</div>${metrics(stat('A components (x, y)','vector-a')+stat('B components (x, y)','vector-b')+stat('R components (x, y)','vector-r')+stat('Resultant magnitude','vector-magnitude')+stat('Resultant direction','vector-direction'))}<div class="chart-legend"><span class="interest-key">A</span><span class="tangent-key">B · dashed copy at A</span><span class="resultant-key">Resultant R</span></div>`;
   const svg=$('.plot');svg.setAttribute('viewBox','0 0 400 340');
-  let equation;
   function update() {
     const am=+$('#a-mag').value,ad=+$('#a-dir').value,bm=+$('#b-mag').value,bd=+$('#b-dir').value,v=addVectors(am,ad,bm,bd);
     for(const [id,value] of [['a-mag',am],['a-dir',ad],['b-mag',bm],['b-dir',bd]])label(id,`${fmt(value)}${id.endsWith('dir')?'°':''}`);
@@ -80,13 +77,12 @@ function vectors({slider,copy}) {
     const arrow=(ax,ay,bx,by,cls,marker)=>Math.hypot(bx-ax,by-ay)<1e-10?'':`<path class="vector-arrow ${cls}" marker-end="url(#${marker})" d="M${x(ax)} ${y(ay)}L${x(bx)} ${y(by)}"/>`;
     svg.innerHTML=`<defs>${['a','b','r'].map(id=>`<marker id="arrow-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-${id}" d="M0 0L10 5L0 10Z"/></marker>`).join('')}</defs>${[-1,-.5,0,.5,1].map(t=>`<path class="gridline" d="M${x(t*extent)} 30V310 M60 ${y(t*extent)}H340"/><text x="${x(t*extent)}" y="325" text-anchor="middle">${fmt(t*extent)}</text><text x="50" y="${y(t*extent)+4}" text-anchor="end">${fmt(t*extent)}</text>`).join('')}<path class="vector-axis" d="M50 170H355 M200 20V310"/><text x="362" y="175">x</text><text x="208" y="22">y</text>${arrow(0,0,v.a.x,v.a.y,'vector-a','arrow-a')}${arrow(0,0,v.b.x,v.b.y,'vector-b','arrow-b')}${arrow(v.a.x,v.a.y,v.x,v.y,'vector-b translated-vector','arrow-b')}${arrow(0,0,v.x,v.y,'vector-r','arrow-r')}<circle class="selected-point" cx="200" cy="170" r="3"/>`;
     svg.setAttribute('aria-label',`Vector A ${am} at ${ad} degrees, B ${bm} at ${bd} degrees. Resultant (${fmt(v.x)}, ${fmt(v.y)}), magnitude ${fmt(v.magnitude)}, direction ${v.direction===null?'undefined':fmt(v.direction)+' degrees'}. Equal scaling on x and y axes.`);
-    equation=`A = (${v.a.x}, ${v.a.y})\nB = (${v.b.x}, ${v.b.y})\nR = A + B = (${v.x}, ${v.y})`;
   }
-  document.querySelectorAll('input[type=range]').forEach(el=>el.oninput=update);$('#copy').onclick=()=>copy(equation);update();
+  document.querySelectorAll('input[type=range]').forEach(el=>el.oninput=update);update();
 }
 
 const defaultPoints = ()=>[.7,1.6,2.5,3.4,4.3,5.2,6.1,7,7.9,8.8].map((x,i)=>({x,y:1+.7*x+[.4,-.5,.7,-.6,.2,.5,-.7,.3,-.2,.1][i]}));
-function regression({copy}) {
+function regression() {
   let points=defaultPoints(),selected=0,dragging=false,geometry,fit;
   const svg=$('.plot');svg.classList.add('regression-plot');svg.setAttribute('role','group');
   reserveHandleTouch(svg, '.regression-point');
@@ -108,13 +104,12 @@ function regression({copy}) {
   svg.onkeydown=event=>{const node=event.target.closest('[data-point]');if(!node||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();selected=+node.dataset.point;const p=points[selected];p.x=clamp(p.x+(event.key==='ArrowRight'?.1:event.key==='ArrowLeft'?-.1:0));p.y=clamp(p.y+(event.key==='ArrowUp'?.1:event.key==='ArrowDown'?-.1:0));update();svg.querySelector(`[data-point="${selected}"]`).focus();};
   $('#new-sample').onclick=()=>{points=defaultPoints().map(p=>({x:p.x,y:Math.max(.3,Math.min(9.7,1+.7*p.x+(Math.random()-.5)*3))}));selected=0;update();};
   $('#reset-data').onclick=()=>{points=defaultPoints();selected=0;update();};$('#residuals').onchange=update;
-  $('#copy').textContent='Copy fit & data';$('#copy').onclick=()=>copy(JSON.stringify({equation:fit.slope===null?null:`y = ${fit.slope}x + (${fit.intercept})`,...fit,points},null,2));
   new ResizeObserver(update).observe(svg);update();
 }
 
-function bayes({slider,copy}) {
+function bayes({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('prior','Prior probability',0,100,.1,1,'Condition before seeing a test result')}${slider('sensitivity','Sensitivity',0,100,.1,99,'Positive given condition')}${slider('specificity','Specificity',0,100,.1,95,'Negative given no condition')}</div>${metrics(stat('Condition given positive','bayes-posterior')+stat('True positives / population','true-positive')+stat('False positives / population','false-positive')+stat('Positive test probability','positive-probability'))}<div class="chart-legend"><span class="interest-key">Condition / true positives</span><span class="tangent-key">False positives</span><span class="principal-key">Other outcomes</span></div>`;
-  const svg=$('.plot');let equation;
+  const svg=$('.plot');
   function update() {
     const prior=+$('#prior').value/100,sensitivity=+$('#sensitivity').value/100,specificity=+$('#specificity').value/100,result=bayesPositive(prior,sensitivity,specificity);
     for(const [id,v] of [['prior',prior],['sensitivity',sensitivity],['specificity',specificity]])label(id,percent(v));
@@ -125,14 +120,12 @@ function bayes({slider,copy}) {
     const bar=(top,label,segments,summary)=>`<text x="${left}" y="${top-10}">${label}</text><rect class="bayes-other" x="${left}" y="${top}" width="${w}" height="32" rx="4"/>${segments.map(([start,value,cls])=>`<rect class="${cls}" x="${left+w*start}" y="${top}" width="${w*value}" height="32"/>`).join('')}<text x="${left}" y="${top+51}">${summary}</text>`;
     svg.innerHTML=bar(40,'Before test · whole population',[[0,prior,'bayes-true']],`Prior condition: ${percent(prior)}`)+bar(140,'Positive tests · whole population',[[0,result.truePositive,'bayes-true'],[result.truePositive,result.falsePositive,'bayes-false']],`Positive tests: ${percent(result.positive)}`)+bar(240,'After positive · positive tests only',result.posterior===null?[]:[[0,result.posterior,'bayes-true'],[result.posterior,1-result.posterior,'bayes-false']],result.posterior===null?'Undefined: no positive tests possible':`Condition given positive: ${percent(result.posterior)}`);
     svg.setAttribute('aria-label',`Screening test: prior ${percent(prior)}, sensitivity ${percent(sensitivity)}, specificity ${percent(specificity)}. True positives ${percent(result.truePositive)} and false positives ${percent(result.falsePositive)} of population. Posterior ${percent(result.posterior)}. The final bar is normalized to positive tests only.`);
-    equation=`P(Condition | Positive) = (${sensitivity} * ${prior}) / ((${sensitivity} * ${prior}) + ((1 - ${specificity}) * (1 - ${prior})))\nPosterior = ${result.posterior===null?'undefined (positive result has zero probability)':result.posterior}`;
   }
-  $('#copy').onclick=()=>copy(equation);watch(update);
+  watch(update);
 }
 
-function logistic({slider,copy}) {
+function logistic({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('population','Initial population P₀',1,1000,1,50,'Strictly positive')}${slider('logistic-rate','Growth rate r',0,1,.01,.2,'Intrinsic rate per time unit')}${slider('capacity','Carrying capacity K',100,10000,100,1000,'Population supported by resources')}${slider('logistic-time','Time horizon',1,100,1,40,'Time units')}</div>${metrics(stat('Population at horizon','population-final'))}<div class="chart-legend"><span class="interest-key">Population P(t)</span><span class="reference-key">Carrying capacity K</span></div>`;
-  let equation;
   function update() {
     const initial=+$('#population').value,rate=+$('#logistic-rate').value,capacity=+$('#capacity').value,time=+$('#logistic-time').value,final=logisticPopulation(time,initial,rate,capacity);
     for(const [id,v] of [['population',initial],['logistic-rate',rate],['capacity',capacity],['logistic-time',time]])label(id,fmt(v));
@@ -140,9 +133,8 @@ function logistic({slider,copy}) {
     const {svg,x,y,layer}=chart({xmax:time,ymax:Math.max(initial,capacity)*1.12,formatY:fmt,xLabel:'Time'});
     layer.innerHTML=`<path class="reference-line" d="M${x(0)} ${y(capacity)}H${x(time)}"/><path class="curve" d="${path(samples(0,time,400,t=>logisticPopulation(t,initial,rate,capacity)),x,y)}"/>`;
     svg.setAttribute('aria-label',`Logistic population, initial ${initial}, carrying capacity ${capacity}, growth rate ${rate}, population ${fmt(final)} at time ${time}.`);
-    equation=`P(t) = ${capacity} / (1 + ((${capacity} - ${initial}) / ${initial}) e^(-${rate}t))`;
   }
-  $('#copy').onclick=()=>copy(equation);watch(update);
+  watch(update);
 }
 
 export function initAppliedConcept(id,shared) {

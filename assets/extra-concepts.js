@@ -15,7 +15,7 @@ export const extraConcepts = [
     id: 'derivatives', title: 'Derivatives', category: 'Functions',
     intro: 'Move along a parabola and see its instantaneous rate of change as a tangent line.',
     description: 'Follow a tangent to discover the slope at a single point.',
-    equation: ['f(x) = x²', 'f′(x) = 2x'], copyLabels: ['Copy function', 'Copy derivative'],
+    equation: ['f(x) = x²', 'f′(x) = 2x'],
     what: 'A derivative measures instantaneous rate of change. For f(x) = x², the tangent slope at x = a is 2a, and the tangent is y = a² + 2a(x − a).',
     useful: 'Understanding velocity, optimizing quantities, and measuring sensitivity in mathematical models.',
     related: 'Sigmoid Function · Compound Interest · Limits'
@@ -37,9 +37,8 @@ const number = value => Number(value.toFixed(2)).toString();
 const $ = selector => document.querySelector(selector);
 
 
-function interest({ slider, copy }) {
+function interest({ slider }) {
   $('#controls').innerHTML = `<div class="controls extra-controls">${slider('principal','Initial principal',100,100000,100,1000,'USD · initial investment')}${slider('rate','Annual interest rate',0,15,.1,5,'Annual compounding')}${slider('years','Time',1,50,1,20,'Years invested')}</div><div class="metrics" aria-live="polite">${stat('Final value','final-value')}${stat('Interest earned','interest-earned')}</div><div class="chart-legend"><span class="principal-key">Original principal</span><span class="interest-key">Accumulated interest</span></div>`;
-  let equation;
   function update() {
     const principal = +$('#principal').value, rate = +$('#rate').value / 100, years = +$('#years').value;
     const final = futureValue(principal, rate, years);
@@ -55,16 +54,12 @@ function interest({ slider, copy }) {
     const curve = path(points, x, y);
     layer.innerHTML = `<path class="principal-area" d="M${x(0)} ${y(0)}V${y(principal)}H${x(years)}V${y(0)}Z"/><path class="area" d="${curve}L${x(years)} ${y(principal)}L${x(0)} ${y(principal)}Z"/><path class="principal-line" d="M${x(0)} ${y(principal)}H${x(years)}"/><path class="curve" d="${curve}"/>`;
     svg.setAttribute('aria-label', `Annual investment balances from ${money.format(principal)} to ${money.format(final)} over ${years} years; interest earned ${money.format(final - principal)}.`);
-    equation = `FV = ${principal} * (1 + ${rate})^${years}`;
   }
-  $('#copy').onclick = () => copy(equation);
   watch(update);
 }
 
-function derivatives({ slider, copy }) {
+function derivatives({ slider }) {
   $('#controls').innerHTML = `<div class="controls extra-controls">${slider('point','Point x',-5,5,.1,1,'Move from negative to positive slope')}</div><div class="metrics" aria-live="polite">${stat('x-coordinate','point-x')}${stat('f(x) = x²','point-y')}${stat('Slope f′(x)','point-slope')}</div><div class="chart-legend"><span class="interest-key">Parabola</span><span class="tangent-key">Tangent line</span></div>`;
-  $('#copy').onclick = () => copy('f(x) = x^2');
-  $('#copy-derivative').onclick = () => copy("f'(x) = 2x");
   function update() {
     const at = +$('#point').value;
     $('#point-value').value = at.toFixed(1);
@@ -80,7 +75,7 @@ function derivatives({ slider, copy }) {
   watch(update);
 }
 
-function coins({ copy }) {
+function coins() {
   let state = { flips: 0, heads: 0, history: [] };
   $('#controls').innerHTML = `<div class="network-tools">${[1,10,100].map(n=>`<button data-flips="${n}">Flip ${n === 1 ? 'once' : `${n} times`}</button>`).join('')}<button id="reset">Reset simulation</button></div><div class="metrics" aria-live="polite">${stat('Total flips','total-flips')}${stat('Heads','heads')}${stat('Tails','tails')}${stat('Experimental heads','heads-percent')}</div><div class="chart-legend"><span class="interest-key">Experimental proportion</span><span class="reference-key">Theoretical 50%</span></div>`;
   function update() {
@@ -99,7 +94,6 @@ function coins({ copy }) {
   }
   document.querySelectorAll('[data-flips]').forEach(button => button.onclick = () => { flipCoins(state, +button.dataset.flips); update(); });
   $('#reset').onclick = () => { state = { flips: 0, heads: 0, history: [] }; update(); };
-  $('#copy').onclick = () => copy('P(Heads) = 0.5');
   new ResizeObserver(update).observe($('.plot'));
   update();
 }

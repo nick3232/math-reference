@@ -48,7 +48,7 @@ with sync_playwright() as p:
  start=coords(200,48);end=coords(78,170)
  page.mouse.move(**start);page.mouse.down();page.mouse.move(**end,steps=6);page.mouse.up()
  expect(page.locator('#angle')).to_have_value('180')
- control=page.locator('#angle');control.scroll_into_view_if_needed();box=control.bounding_box();control.tap(position={'x':box['width']*.75,'y':20});assert control.input_value()!='180'
+ control=page.locator('#angle');control.scroll_into_view_if_needed();box=control.bounding_box();control.locator('..').locator('.range-gesture').tap(position={'x':box['width']*.75,'y':20});assert control.input_value()!='180'
  # Other draggable plots keep their touch interactions.
  for concept,selector,attribute in [('graph','[data-id="1"]','transform'),('regression','[data-point="0"] .selected-point','cx')]:
   page.goto(base+'concept.html?concept='+concept)

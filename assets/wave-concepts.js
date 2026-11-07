@@ -62,9 +62,8 @@ const piLabel = value => {
   return `${multiple < 0 ? '−' : ''}${Math.abs(multiple) === 1 ? '' : Math.abs(multiple)}π`;
 };
 
-function trigonometric({slider,copy}) {
+function trigonometric({slider}) {
   $('#controls').innerHTML = `<div class="controls extra-controls">${slider('amplitude','Amplitude A',.1,3,.1,1,'Peak height')}${slider('frequency','Frequency B',.5,4,.1,1,'Period = 2π/B')}${slider('phase','Phase C',-2,2,.01,0,'Multiples of π · −2π to 2π')}</div><div class="network-tools wave-toggles"><label><input type="checkbox" id="show-sine" checked> Sine</label><label><input type="checkbox" id="show-cosine" checked> Cosine</label></div><div class="chart-legend"><span class="interest-key">Sine · solid</span><span class="tangent-key">Cosine · dashed</span></div>`;
-  let equation;
   function update() {
     const a=+$('#amplitude').value,b=+$('#frequency').value,c=+$('#phase').value*Math.PI;
     label('amplitude',fmt(a));label('frequency',fmt(b));label('phase',`${fmt(c/Math.PI)}π`);
@@ -72,16 +71,13 @@ function trigonometric({slider,copy}) {
     layer.innerHTML=`<path class="axis" d="M${x(-2*Math.PI)} ${y(0)}H${x(2*Math.PI)} M${x(0)} ${y(-3.6)}V${y(3.6)}"/>${$('#show-sine').checked?`<path class="curve sine-curve" d="${path(samples(-2*Math.PI,2*Math.PI,640,v=>sineWave(v,a,b,c)),x,y)}"/>`:''}${$('#show-cosine').checked?`<path class="tangent-line cosine-curve" d="${path(samples(-2*Math.PI,2*Math.PI,640,v=>cosineWave(v,a,b,c)),x,y)}"/>`:''}`;
     $('#stat').textContent=`Period = ${fmt(2/b)}π`;
     svg.setAttribute('aria-label',`Sine ${$('#show-sine').checked?'shown':'hidden'} and cosine ${$('#show-cosine').checked?'shown':'hidden'}; amplitude ${a}, frequency ${b}, phase ${fmt(c)} radians.`);
-    equation=`y = ${a} sin(${b}x + (${+$('#phase').value} pi))\ny = ${a} cos(${b}x + (${+$('#phase').value} pi))`;
   }
-  $('#copy').onclick=()=>copy(equation);
   document.querySelectorAll('.wave-toggles input').forEach(input=>input.onchange=update);
   watch(update);
 }
 
-function growth({slider,copy}) {
+function growth({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('initial','Initial value A',1,100,1,10,'Value at time zero')}${slider('growth','Growth constant k',-1,1,.01,.2,'Negative: decay · zero: constant')}${slider('horizon','Time horizon',1,20,1,10,'Time units')}</div>${metrics(stat('Initial value','initial-result')+stat('Final value','growth-final')+stat('Doubling time / half-life','growth-time'))}<div class="chart-legend"><span class="interest-key">Exponential value</span><span class="reference-key">Initial value</span></div>`;
-  let equation;
   function update() {
     const a=+$('#initial').value,k=+$('#growth').value,t=+$('#horizon').value,final=exponential(t,a,k);
     label('initial',fmt(a));label('growth',fmt(k));label('horizon',fmt(t));
@@ -91,14 +87,12 @@ function growth({slider,copy}) {
     const {svg,x,y,layer}=chart({xmax:t,ymax:Math.max(a,final)*1.12,formatY:fmt,xLabel:'Time'});
     layer.innerHTML=`<path class="reference-line" d="M${x(0)} ${y(a)}H${x(t)}"/><path class="curve" d="${path(samples(0,t,400,v=>exponential(v,a,k)),x,y)}"/>`;
     svg.setAttribute('aria-label',`Exponential ${k>0?'growth':k<0?'decay':'constant'} from ${fmt(a)} to ${fmt(final)} in ${t} time units, growth constant ${k}.`);
-    equation=`y = ${a} e^(${k}x)`;
   }
-  $('#copy').onclick=()=>copy(equation);watch(update);
+  watch(update);
 }
 
-function logs({slider,copy}) {
+function logs({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls"><div class="control"><label for="base">Logarithm base b</label><select id="base"><option value="2">2</option><option value="e" selected>e ≈ 2.71828</option><option value="10">10</option></select><small>Positive bases, excluding 1</small></div>${slider('domain','Domain upper bound',2,20,1,10,'Only x > 0 is defined')}</div><p class="status">x = 0 is a vertical asymptote. The curve continues downward beyond the plot.</p>`;
-  let equation;
   function update() {
     const raw=$('#base').value,b=raw==='e'?Math.E:Number(raw),max=+$('#domain').value;
     label('domain',max);$('#stat').textContent='Domain: x > 0';
@@ -107,14 +101,12 @@ function logs({slider,copy}) {
     const min=b**-7,points=Array.from({length:501},(_,i)=>{const v=min*(max/min)**(i/500);return [v,logarithm(v,b)];});
     layer.innerHTML=`<path class="reference-line" d="M${x(0)} ${y(-5)}V${y(Math.max(2,logarithm(max,b))*1.1)}"/><path class="axis" d="M${x(0)} ${y(0)}H${x(max)}"/><path class="curve" d="${path(points,x,y)}"/><circle class="selected-point" cx="${x(1)}" cy="${y(0)}" r="5"/><text x="${x(1)+8}" y="${y(0)-12}">(1, 0)</text>`;
     svg.setAttribute('aria-label',`Logarithm base ${raw}, positive domain up to ${max}, passing through (1, 0) and tending to negative infinity near zero.`);
-    equation=`y = ln(x) / ln(${raw==='e'?'e':raw}), x > 0`;
   }
-  $('#base').onchange=update;$('#copy').onclick=()=>copy(equation);watch(update);
+  $('#base').onchange=update;watch(update);
 }
 
-function binomial({slider,copy}) {
+function binomial({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('trials','Trials n',1,50,1,10,'Independent trials')}${slider('success','Success probability p',0,1,.01,.5,'Same probability for every trial')}${slider('outcome','Selected successes k',0,10,1,5,'Select one bar')}</div>${metrics(stat('P(X = k)','outcome-probability')+stat('Expected value np','expected-value')+stat('Standard deviation','binomial-sd'))}<div class="chart-legend"><span class="interest-key">Distribution</span><span class="tangent-key">Selected outcome</span></div>`;
-  let equation;
   function update() {
     const n=+$('#trials').value,p=+$('#success').value;
     $('#outcome').max=n;if(+$('#outcome').value>n)$('#outcome').value=n;
@@ -129,31 +121,28 @@ function binomial({slider,copy}) {
     const barWidth=(x(1)-x(0))*.8;
     layer.innerHTML=probabilities.map((v,i)=>`<rect class="probability-bar ${i===k?'chosen':''}" x="${x(i)-barWidth/2}" y="${y(v)}" width="${barWidth}" height="${y(0)-y(v)}"><title>${i} successes: ${(v*100).toPrecision(5)}%</title></rect>`).join('');
     svg.setAttribute('aria-label',`Binomial distribution, ${n} trials, success probability ${p}. Selected ${k} successes has probability ${selected}. Mean ${fmt(n*p)}, standard deviation ${fmt(Math.sqrt(n*p*(1-p)))}.`);
-    equation=`P(X = ${k}) = C(${n},${k}) * ${p}^${k} * (1 - ${p})^${n-k}`;
   }
-  $('#copy').onclick=()=>copy(equation);watch(update);
+  watch(update);
 }
 
-function unitCircle({slider,copy}) {
+function unitCircle({slider}) {
   $('#controls').innerHTML=`<div class="controls extra-controls">${slider('angle','Angle θ',0,360,1,45,'Counterclockwise from positive x')}</div>${metrics(stat('Angle (radians)','angle-radians')+stat('cos θ = x','circle-cos')+stat('sin θ = y','circle-sin'))}<div class="chart-legend"><span class="interest-key">Cosine · horizontal</span><span class="tangent-key">Sine · vertical</span></div>`;
   const svg=$('.plot');svg.classList.add('unit-plot');svg.setAttribute('viewBox','0 0 400 340');
   reserveHandleTouch(svg, '.circle-handle');
   const cx=200,cy=170,r=122;
-  let equation;
   function update() {
     const degrees=+$('#angle').value,point=circleCoordinates(degrees),px=cx+r*point.x,py=cy-r*point.y;
     label('angle',`${degrees}°`);$('#angle-radians').value=`${fmt(point.radians)} rad`;
     $('#circle-cos').value=fmt(point.x);$('#circle-sin').value=fmt(point.y);$('#stat').textContent=`θ = ${degrees}°`;
     svg.innerHTML=`<path class="axis" fill="none" d="M40 ${cy}H360 M${cx} 15V325"/><circle class="unit-outline" cx="${cx}" cy="${cy}" r="${r}"/><path class="circle-radius" d="M${cx} ${cy}L${px} ${py}"/><path class="projection-guide" d="M${px} ${py}V${cy} M${px} ${py}H${cx}"/><path class="curve" d="M${cx} ${cy}H${px}"/><path class="tangent-line" d="M${px} ${cy}V${py}"/><circle class="selected-point" cx="${px}" cy="${py}" r="8"/><circle class="circle-hit circle-handle" cx="${px}" cy="${py}" r="32"/><text x="366" y="${cy+5}">x</text><text x="${cx+9}" y="22">y</text><text x="${cx+r}" y="${cy+20}" text-anchor="middle">1</text><text x="${cx-r}" y="${cy+20}" text-anchor="middle">−1</text><text x="${cx-10}" y="${cy-r+4}" text-anchor="end">1</text><text x="${cx-10}" y="${cy+r+4}" text-anchor="end">−1</text><text x="${cx-12}" y="${cy+18}">0</text>`;
     svg.setAttribute('aria-label',`Unit circle, angle ${degrees} degrees, cosine ${fmt(point.x)}, sine ${fmt(point.y)}. Use the angle slider or drag the point.`);
-    equation=`x = cos(${degrees} pi / 180)\ny = sin(${degrees} pi / 180)\nx^2 + y^2 = 1`;
   }
   let dragging=false;
   const move=event=>{const p=new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse());const deg=(Math.atan2(cy-p.y,p.x-cx)*180/Math.PI+360)%360;$('#angle').value=Math.round(deg);update();};
   svg.onpointerdown=event=>{if(!event.target.classList.contains('circle-handle'))return;event.preventDefault();dragging=true;svg.setPointerCapture(event.pointerId);move(event);};
   svg.onpointermove=event=>{if(dragging)move(event);};
   svg.onpointerup=svg.onpointercancel=svg.onlostpointercapture=()=>{dragging=false;};
-  $('#angle').oninput=update;$('#copy').onclick=()=>copy(equation);update();
+  $('#angle').oninput=update;update();
 }
 
 export function initWaveConcept(id, shared) {

@@ -1,8 +1,8 @@
-import { reserveHandleTouch } from './touch.js';
+import { enableRangeTouch, reserveHandleTouch } from './touch.js';
 import { initAppliedConcept, appliedConcepts } from './applied-concepts.js';
 import { initWaveConcept, waveConcepts } from './wave-concepts.js';
 import { initExtraConcept, extraConcepts } from './extra-concepts.js';
-import { sigmoid, normal, edgeKey, graphData } from './math.js';
+import { sigmoid, normal, edgeKey } from './math.js';
 const concepts = [
   { id:'sigmoid', title:'Sigmoid Function', category:'Functions', intro:'Explore how a smooth S-shaped curve turns any real number into a value between 0 and 1.', description:'A smooth transition, shaped by steepness and midpoint.', equation:'f(x) = 1 / (1 + e<sup>−k(x − x₀)</sup>)', what:'The logistic sigmoid maps the real line into (0, 1). Its midpoint has value ½; steepness controls the direction and speed of the transition.', useful:'Logistic regression, neural networks, and modeling gradual transitions or saturation.', related:'Logistic Growth · Logit · Hyperbolic tangent' },
   { id:'normal', title:'Normal Distribution', category:'Probability & Statistics', intro:'See how mean and standard deviation shape the familiar bell curve.', description:'Explore the bell curve and the probability within it.', equation:'f(x) = e<sup>−(x − μ)² / (2σ²)</sup> / (σ√(2π))', what:'A continuous probability distribution centered at its mean μ, with spread determined by its standard deviation σ. The total area under the curve is 1.', useful:'Measurement error, statistical inference, and approximating averages through the central limit theorem.', related:'Variance · Standard score · Central limit theorem' },
@@ -25,28 +25,22 @@ function home() {
   document.querySelector('#search').addEventListener('input',render);
   document.querySelectorAll('[data-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category;document.querySelectorAll('[data-category]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();}));render();
 }
-// Equations share a block with their copy action; only independently copied
-// expressions (such as the derivative pair) receive separate blocks.
+// Separate expressions with layout gaps, retaining ordinary browser text selection.
 function equationSection(c) {
   const expressions = Array.isArray(c.equation) ? c.equation : [c.equation];
-  const groups = c.copyLabels ? expressions.map(expression => [expression]) : [expressions];
-  return `<div class="equation-row">${groups.map((group,i) => `<div class="equation-block"><div class="equations">${group.map(expression=>`<span class="equation">${expression}</span>`).join('')}</div><button id="${i ? 'copy-derivative' : 'copy'}">${c.copyLabels?.[i] || (c.id==='graph' ? 'Copy graph data' : 'Copy equation')}</button></div>`).join('')}<span class="stat" id="stat"></span><span class="copy-status" role="status" id="copy-status"></span></div>`;
+  return `<div class="equation-row"><div class="equations">${expressions.map(expression=>`<span class="equation">${expression}</span>`).join('')}</div><span class="stat" id="stat"></span></div>`;
 }
 function page(c) {
   document.title=`${c.title} · Math Reference`;
   app.innerHTML=`${header}<main><a class="back" href="index.html">← All concepts</a><div class="concept-heading"><div class="eyebrow">${c.category}</div><h1>${c.title}</h1><p>${c.intro}</p></div><section class="workspace" aria-label="Interactive ${c.title}"><div class="viz-heading"><span>${c.id==='regression'?'Drag points or use arrow keys':c.id==='graph'?'Drag vertices · select a vertex or edge':c.id==='coins'?'Flip a coin · watch the proportion evolve':c.id==='unit-circle'?'Move the slider or drag the point':'Move the sliders to explore'}</span><span class="live">● Interactive</span></div><svg class="plot ${c.id==='graph'?'network':''}" viewBox="0 0 760 340" role="${c.id==='graph'?'group':'img'}" aria-label="${c.title} visualization"></svg>${equationSection(c)}<div id="controls"></div></section><details class="info"><summary>Explanation, applications &amp; related concepts</summary><div class="info-content"><section><h2>What is it?</h2><p>${c.what}</p></section><section><h2>Where is it useful?</h2><p>${c.useful}</p></section><section><h2>Related concepts</h2><p>${c.related.split(' · ').map(title=>{const match=concepts.find(x=>x.title===title);return match?`<a href="${url(match)}">${title}</a>`:title;}).join(' · ')}</p></section></div></details></main>`;
-  if(appliedConcepts.some(x=>x.id===c.id)) initAppliedConcept(c.id, { slider, copy }); else if(waveConcepts.some(x=>x.id===c.id)) initWaveConcept(c.id, { slider, copy }); else if(extraConcepts.some(x=>x.id===c.id)) initExtraConcept(c.id, { slider, copy }); else if(c.id==='graph') network(); else curves(c.id);
+  if(appliedConcepts.some(x=>x.id===c.id)) initAppliedConcept(c.id, { slider }); else if(waveConcepts.some(x=>x.id===c.id)) initWaveConcept(c.id, { slider }); else if(extraConcepts.some(x=>x.id===c.id)) initExtraConcept(c.id, { slider }); else if(c.id==='graph') network(); else curves(c.id);
+  enableRangeTouch(document.querySelector('#controls'));
 }
-async function copy(text) {
-  const status=document.querySelector('#copy-status');
-  try { await navigator.clipboard.writeText(text);status.textContent='Copied to clipboard'; }
-  catch {const field=document.createElement('textarea');field.value=text;field.setAttribute('aria-label','Copy this data manually');document.querySelector('.equation-row').append(field);field.focus();field.select();status.textContent='Clipboard unavailable. Select and copy the text below.';}
-}
-function slider(id,label,min,max,step,value,hint) {return `<div class="control"><label for="${id}">${label}<output id="${id}-value" for="${id}">${value}</output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"><small>${hint}</small></div>`;}
+function slider(id,label,min,max,step,value,hint) {return `<div class="control"><label for="${id}">${label}<output id="${id}-value" for="${id}">${value}</output></label><div class="range-surface"><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"><span class="range-gesture" aria-hidden="true"></span></div><small>${hint}</small></div>`;}
 function curves(id) {
   const isNormal=id==='normal';
   document.querySelector('#controls').innerHTML=`<div class="controls">${isNormal?slider('mean','Mean μ',-4,4,.1,0,'Location of the center')+slider('deviation','Std. deviation σ',.3,3,.1,1,'Spread around the mean'):slider('steepness','Steepness k',-5,5,.1,1,'Negative values reverse the curve')+slider('midpoint','Midpoint x₀',-6,6,.1,0,'Position where f(x) = ½')}</div>`;
-  const svg=document.querySelector('.plot');let equation='';
+  const svg=document.querySelector('.plot');
   const update=()=>{
     const vals=[...document.querySelectorAll('input[type=range]')].map(el=>{document.querySelector(`#${el.id}-value`).value=Number(el.value).toFixed(1);return +el.value;});
     const width=Math.max(320,Math.round(svg.clientWidth));svg.setAttribute('viewBox',`0 0 ${width} 340`);
@@ -60,9 +54,8 @@ function curves(id) {
     svg.innerHTML=`${grid}<path class="axis" d="M52 295H${width-24} M${x(0)} 25V295"/>${shade}<path class="curve" d="${path}"/><text x="${width-27}" y="334">x</text>`;
     svg.setAttribute('aria-label',isNormal?`Normal density with mean ${a} and standard deviation ${b}; shaded interval ${+(a-b).toFixed(1)} to ${+(a+b).toFixed(1)}, probability approximately 68.27 percent`:`Sigmoid curve with steepness ${a} and midpoint ${b}`);
     document.querySelector('#stat').textContent=isNormal?`μ ± σ · ≈ 68.27%`:`f(${b.toFixed(1)}) = 0.5`;
-    equation=isNormal?`f(x) = exp(-(x - (${a}))^2 / (2 * ${b}^2)) / (${b} * sqrt(2*pi))`:`f(x) = 1 / (1 + exp(-(${a}) * (x - (${b}))))`;
   };
-  document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',update));document.querySelector('#copy').addEventListener('click',()=>copy(equation));new ResizeObserver(update).observe(svg);update();
+  document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',update));new ResizeObserver(update).observe(svg);update();
 }
 function network() {
   const svg=document.querySelector('.plot');let vertices=[],edges=[],nextId=1,selected=null,drag=null;
@@ -84,7 +77,7 @@ function network() {
   svg.addEventListener('pointermove',e=>{if(drag===null)return;const point=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());const v=vertices.find(v=>v.id===drag);v.x=Math.max(25,Math.min(735,point.x));v.y=Math.max(25,Math.min(315,point.y));render();});
   const end=()=>{drag=null;};svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);svg.addEventListener('lostpointercapture',end);
   svg.addEventListener('keydown',e=>{const node=e.target.closest('[data-id], [data-edge]');if(!node)return;const id=node.dataset.id?+node.dataset.id:node.dataset.edge;if(e.key==='Enter'||e.key===' '){e.preventDefault();selected=id;render();}else if(typeof id==='number'&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();selected=id;const v=vertices.find(v=>v.id===id);v.x=Math.max(25,Math.min(735,v.x+(e.key==='ArrowRight'?10:e.key==='ArrowLeft'?-10:0)));v.y=Math.max(25,Math.min(315,v.y+(e.key==='ArrowDown'?10:e.key==='ArrowUp'?-10:0)));render();}else return;svg.querySelector(typeof id==='number'?`[data-id="${id}"]`:`[data-edge="${id}"]`)?.focus();});
-  document.querySelector('#copy').onclick=()=>copy(JSON.stringify(graphData(vertices,edges),null,2));randomize();
+  randomize();
 }
 const id=new URLSearchParams(location.search).get('concept');
 if(location.pathname.endsWith('concept.html')){const c=concepts.find(c=>c.id===id);if(c)page(c);else app.innerHTML=`${header}<main><h1>Concept not found</h1><a href="index.html">Return to the library →</a></main>`;}else home();
