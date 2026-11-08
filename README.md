@@ -1,6 +1,6 @@
 # Math Reference
 
-A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes sixteen concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, and Logistic Growth. No dependencies or build step.
+A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes seventeen concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, and Portfolio Drawdown. No dependencies or build step.
 
 ## Run locally
 
@@ -19,18 +19,19 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 ## Structure
 
 - `index.html`: library entry point.
-- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, or `logistic` selects the concept.
+- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, or `portfolio` selects the concept.
 - `assets/styles.css`: responsive layouts, visualization styling, and automatic system light/dark themes.
 - `assets/app.js`: concept metadata, shared layout, search/category filtering, controls, SVG graphs, and network editor.
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
 - `assets/wave-concepts.js`: metadata and visualizations for trigonometric, exponential, logarithmic, binomial, and unit-circle concepts.
 - `assets/applied-concepts.js`: metadata and visualizations for integration, vectors, regression, Bayesian updating, and logistic populations.
 - `assets/touch.js`: scoped SVG handle touch handling plus centralized direction-aware range gestures. Native inputs retain their appearance, constraints, labels, and keyboard accessibility.
+- `assets/portfolio.js`: Portfolio Drawdown metadata and two-series visualization; `assets/portfolio-model.js` contains the monthly simulation.
 - `assets/charts.js`: shared responsive SVG coordinates, tick formatters, clipping, paths, metrics, and control initialization.
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
 - `tests/slider_touch_smoke.py`: vertical scroll protection, continuous horizontal adjustments, taps, keyboard/mouse interaction, and optional exact baseline checks for graph markup and range constraints.
-- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all sixteen mobile page layouts.
+- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all seventeen mobile page layouts.
 - `tests/applied_concepts_smoke.py`: Batch 4 calculations, edge states, regression mouse/touch dragging and keyboard editing, and four viewport widths in both themes.
 - `tests/new_concepts_smoke.py`: the Batch 3 visualizations, all-concept search/navigation, touch controls, and circle geometry; uses the same optional Playwright tooling.
 
@@ -70,6 +71,8 @@ Bayes’ Theorem models a screening test with prior, sensitivity, and specificit
 
 Logistic Growth uses positive initial populations 1–1,000, carrying capacities 100–10,000, intrinsic rates 0–1, and horizons 1–100. It shows the capacity reference and final population. Rate zero or P₀ = K is constant; P₀ > K declines toward capacity. The optional unrestricted-exponential comparison is not included; the existing Exponential Growth & Decay page is linked for comparison.
 
+Portfolio Drawdown models end-of-month withdrawals after a monthly return of r/12. Controls: starting portfolio $100,000–$2,000,000 (step $25,000, default $500,000), annual return 0%–12% (step 0.5%, default 6%), monthly withdrawal $0–$10,000 (step $250, default $3,000), and horizon 5–50 years (default 30). Reset restores all defaults. Both dollar-denominated series include month zero and every subsequent month on the same vertical scale. Withdrawals are capped at available funds; balances remain zero and withdrawals stop after depletion. Depletion timing is calculated monthly and displayed in years to two decimals. No intermediate results are rounded; displayed readouts round to whole dollars. With the defaults, the portfolio depletes in month 360 with a partial final withdrawal. This constant-return illustration excludes inflation, taxes, fees, and market volatility; it is not a forecast. Sequence-of-returns risk is explained without simulating variable returns.
+
 Concept pages return to the directory through **All concepts** near the top; related links remain in the collapsed explanation. Empty areas of the Unit Circle, network, and regression plots allow normal page scrolling. Only draggable points/vertices reserve touch gestures for manipulation.
 
 On touch-capable devices, a transparent hit layer over each native range waits for an 8px direction threshold. Vertical swipes use native page scrolling without committing a value; horizontal drags update the existing input continuously. Taps set a value on release. Native input min/max/step sanitization is retained; no mathematical calculations change. Fine-pointer desktops continue to use native mouse handling. The shared layer is needed because native range inputs can commit a value on touch-down even with `touch-action: pan-y`. Touch checks use Chromium emulation; physical iOS/Android device behavior has not been verified.
@@ -77,7 +80,7 @@ On touch-capable devices, a transparent hit layer over each native range waits f
 ## Checks
 
 ```sh
-node --test tests/math.test.mjs
+node --test tests/*.test.mjs
 # With the static server running and optional Python Playwright tooling:
 python3 tests/browser_smoke.py
 python3 tests/new_concepts_smoke.py
@@ -85,6 +88,7 @@ python3 tests/applied_concepts_smoke.py
 python3 tests/navigation_touch_smoke.py
 python3 tests/equation_presentation_smoke.py
 python3 tests/slider_touch_smoke.py
+python3 tests/portfolio_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.

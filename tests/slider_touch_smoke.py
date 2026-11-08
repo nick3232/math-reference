@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 import os, shutil
 base=os.environ.get('MATH_REFERENCE_URL','http://localhost:8000/')
 baseline=os.environ.get('MATH_REFERENCE_BASELINE_URL')
-CASES=[('interest','principal'),('interest','rate'),('derivatives','point'),('trigonometric','amplitude'),('trigonometric','frequency'),('trigonometric','phase'),('unit-circle','angle')]
+CASES=[('interest','principal'),('interest','rate'),('derivatives','point'),('trigonometric','amplitude'),('trigonometric','frequency'),('trigonometric','phase'),('unit-circle','angle'),('portfolio','portfolio-start'),('portfolio','portfolio-return'),('portfolio','portfolio-withdrawal'),('portfolio','portfolio-years')]
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':390,'height':650},has_touch=True,is_mobile=True)

@@ -17,3 +17,5 @@
 
 .range-surface{position:relative}.range-gesture{display:none;position:absolute;inset:0;touch-action:pan-y pinch-zoom;user-select:none}
 @media(any-pointer:coarse){.range-gesture{display:block}}
+
+.portfolio-summary{padding-top:12px}.portfolio-summary .metrics output{font-size:1.25rem}

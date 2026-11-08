@@ -6,7 +6,7 @@ with sync_playwright() as p:
  page=context.new_page(); errors=[]
  page.on('pageerror',lambda e: errors.append(str(e)))
  base=os.environ.get('MATH_REFERENCE_URL', 'http://localhost:8000/')
- page.goto(base); assert page.locator('.card').count()==16
+ page.goto(base); assert page.locator('.card').count()==17
  page.locator('#search').fill('normal');assert page.locator('.card').count()==1
  page.get_by_role('button',name='Functions',exact=True).click();assert page.locator('.card').count()==0
  page.locator('#search').fill('');assert page.locator('.card').count()==8
