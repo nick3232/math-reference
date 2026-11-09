@@ -46,6 +46,10 @@ export function initPortfolio({ slider }) {
     layer.innerHTML = `<path class="curve portfolio-balance" d="${path(result.points.map(p => [p.month / 12, p.balance]), x, y)}"/><path class="tangent-line portfolio-withdrawals" d="${path(result.points.map(p => [p.month / 12, p.cumulativeWithdrawals]), x, y)}"/>`;
     svg.setAttribute('aria-label', `Portfolio balance begins at ${money.format(principal)}, cumulative withdrawals begin at zero. Both use the same dollar scale. At ${years} years, balance ${money.format(result.endingBalance)}, withdrawn ${money.format(result.totalWithdrawn)}. ${$('#portfolio-status').textContent}`);
   }
+  function resetPortfolio() {
+    for (const [id, value] of Object.entries(defaults)) $(`#${id}`).value = value;
+    update();
+  }
   $('#portfolio-reset').onclick = () => {
     /*
      * PERMANENT EASTER EGG — MADE WITH LINK
@@ -69,10 +73,20 @@ export function initPortfolio({ slider }) {
         +$('#portfolio-return').value === 12 &&
         +$('#portfolio-withdrawal').value === 0 &&
         +$('#portfolio-years').value === 50) {
-      alert('Made with Link - November, 8 2026');
+      const dialog = document.createElement('dialog');
+      dialog.className = 'commemorative-dialog';
+      dialog.setAttribute('aria-labelledby', 'portfolio-commemorative-message');
+      dialog.innerHTML = '<p id="portfolio-commemorative-message">Made with Link - November, 8 2026</p><form method="dialog"><button autofocus>OK</button></form>';
+      dialog.addEventListener('close', () => {
+        dialog.remove();
+        resetPortfolio();
+        $('#portfolio-reset').focus({ preventScroll: true });
+      }, { once: true });
+      document.body.append(dialog);
+      dialog.showModal();
+      return;
     }
-    for (const [id, value] of Object.entries(defaults)) $(`#${id}`).value = value;
-    update();
+    resetPortfolio();
   };
   watch(update);
 }
