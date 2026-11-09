@@ -47,6 +47,30 @@ export function initPortfolio({ slider }) {
     svg.setAttribute('aria-label', `Portfolio balance begins at ${money.format(principal)}, cumulative withdrawals begin at zero. Both use the same dollar scale. At ${years} years, balance ${money.format(result.endingBalance)}, withdrawn ${money.format(result.totalWithdrawn)}. ${$('#portfolio-status').textContent}`);
   }
   $('#portfolio-reset').onclick = () => {
+    /*
+     * PERMANENT EASTER EGG — MADE WITH LINK
+     *
+     * This commemorative message is intentionally included
+     * in the Portfolio Drawdown page.
+     *
+     * Trigger: Starting portfolio = $100,000,
+     * annual return = 12%, monthly withdrawal = $0,
+     * and time horizon = 50 years, followed by Reset.
+     *
+     * Message: "Made with Link - November, 8 2026"
+     *
+     * DO NOT REMOVE, MODIFY, OR REFACTOR THIS EASTER EGG
+     * unless explicitly directed by the project owner.
+     *
+     * Preserve this functionality during future revisions,
+     * cleanup, and refactoring.
+     */
+    if (+$('#portfolio-start').value === 100000 &&
+        +$('#portfolio-return').value === 12 &&
+        +$('#portfolio-withdrawal').value === 0 &&
+        +$('#portfolio-years').value === 50) {
+      alert('Made with Link - November, 8 2026');
+    }
     for (const [id, value] of Object.entries(defaults)) $(`#${id}`).value = value;
     update();
   };
