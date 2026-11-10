@@ -6,14 +6,14 @@ with sync_playwright() as p:
  page=context.new_page(); errors=[]
  page.on('pageerror',lambda e: errors.append(str(e)))
  base=os.environ.get('MATH_REFERENCE_URL', 'http://localhost:8000/')
- page.goto(base); assert page.locator('.card').count()==17
+ page.goto(base); assert page.locator('.card').count()==18
  page.locator('#search').fill('normal');assert page.locator('.card').count()==1
  page.get_by_role('button',name='Functions',exact=True).click();assert page.locator('.card').count()==0
  page.locator('#search').fill('');assert page.locator('.card').count()==8
  page.goto(base+'concept.html?concept=sigmoid')
  for name,value in [('steepness','-2'),('midpoint','3')]:
   before=page.locator('.curve').get_attribute('d');page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',value);assert before!=page.locator('.curve').get_attribute('d')
- assert not page.locator('details').evaluate('(el)=>el.open')
+ assert not page.locator('details.info').evaluate('(el)=>el.open')
  page.screenshot(path='/tmp/math-sigmoid-mobile.png',full_page=True)
  page.goto(base+'concept.html?concept=normal')
  for name,value in [('mean','4'),('deviation','.3')]:
@@ -38,8 +38,8 @@ with sync_playwright() as p:
   page.locator('.card').click();assert page.url.endswith('concept='+concept)
   assert page.locator('.other-nav').count()==0
   expect(page.locator('.plot > .axis')).to_have_css('fill','none')
-  assert not page.locator('details').evaluate('(el)=>el.open')
-  page.locator('summary').click()
+  assert not page.locator('details.info').evaluate('(el)=>el.open')
+  page.locator('details.info > summary').click()
   for link in page.locator('.info-content a').all():
    assert page.request.get(base+link.get_attribute('href')).ok
  def set_slider(name,value):

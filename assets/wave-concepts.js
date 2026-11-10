@@ -37,7 +37,7 @@ export const waveConcepts = [
     equation:'P(X = k) = C(n,k) p<sup>k</sup> (1 − p)<sup>n−k</sup>',
     what:'A binomial random variable counts successes in n independent trials, each with the same success probability p. C(n,k) counts the ways k successes can occur. Its mean is np and its standard deviation is √(np(1−p)).',
     useful:'Modeling coin-flip counts, quality checks, and repeated yes/no experiments when independence and a fixed probability are reasonable.',
-    related:'Probability & Coin Flips · Normal Distribution'
+    related:'Expected Value · Probability & Coin Flips · Normal Distribution'
   },
   {
     id:'unit-circle', title:'Unit Circle', category:'Functions',

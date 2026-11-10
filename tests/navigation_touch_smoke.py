@@ -6,17 +6,17 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':390,'height':700},has_touch=True,is_mobile=True)
  page=context.new_page();errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
- page.goto(base);links=page.locator('.card').evaluate_all('(els)=>els.map(el=>el.getAttribute("href"))');assert len(links)==17
+ page.goto(base);links=page.locator('.card').evaluate_all('(els)=>els.map(el=>el.getAttribute("href"))');assert len(links)==18
  for link in links:
   page.goto(base+link)
   assert page.locator('.other-nav').count()==0
   assert 'Keep exploring' not in page.locator('main').inner_text()
-  assert not page.locator('details').evaluate('(el)=>el.open')
-  page.locator('summary').click();expect(page.locator('.info-content')).to_be_visible()
+  assert not page.locator('details.info').evaluate('(el)=>el.open')
+  page.locator('details.info > summary').click();expect(page.locator('.info-content')).to_be_visible()
   related=page.locator('.info-content a').evaluate_all('(els)=>els.map(el=>el.getAttribute("href"))')
   for href in related:
    page.goto(base+href);assert page.locator('h1').inner_text()!='Concept not found'
-  page.locator('.back').click();expect(page.locator('.card')).to_have_count(17)
+  page.locator('.back').click();expect(page.locator('.card')).to_have_count(18)
  client=context.new_cdp_session(page)
  def swipe(start,end):
   client.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[start]})
@@ -61,5 +61,5 @@ with sync_playwright() as p:
   assert abs(final['y']+final['height']/2-end['y'])<2
   assert page.locator(selector).get_attribute(attribute)!=before
  assert not errors,errors
- print('PASS: all 17 pages omit bottom directory; All concepts and related links work; native touch scrolling from empty plot interiors/margins; unit-circle mouse/touch drag and slider; network/regression touch drag. Chromium emulation, not physical-device testing.')
+ print('PASS: all 18 pages omit bottom directory; All concepts and related links work; native touch scrolling from empty plot interiors/margins; unit-circle mouse/touch drag and slider; network/regression touch drag. Chromium emulation, not physical-device testing.')
  browser.close()

@@ -27,7 +27,7 @@ export const extraConcepts = [
     equation: 'P(Heads) = 0.5',
     what: 'Each independent fair coin flip has a 50% chance of heads. The experimental probability is heads divided by total flips. The law of large numbers says this proportion tends toward 50% as trials increase; individual runs can still wander, and convergence is not monotonic.',
     useful: 'Understanding sampling variation, simulations, and why larger samples tend to produce more stable estimates.',
-    related: 'Normal Distribution · Law of large numbers · Bernoulli trials'
+    related: 'Expected Value · Normal Distribution · Law of large numbers · Bernoulli trials'
   }
 ];
 
