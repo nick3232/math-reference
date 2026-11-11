@@ -5,7 +5,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  page=browser.new_page(viewport={'width':390,'height':844},has_touch=True,is_mobile=True)
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(base);expect(page.locator('.card')).to_have_count(19)
+ page.goto(base);expect(page.locator('.card')).to_have_count(20)
  page.get_by_role('button',name='Functions',exact=True).click()
  page.locator('#search').fill('transformations');expect(page.locator('.card')).to_have_count(1)
  page.locator('.card').click();expect(page.locator('h1')).to_have_text('Function Transformations')

@@ -6,8 +6,8 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  page=browser.new_page(viewport={'width':390,'height':844},has_touch=True,is_mobile=True);errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(base);expect(page.locator('.card')).to_have_count(19)
- page.get_by_role('button',name='Finance',exact=True).click();expect(page.locator('.card')).to_have_count(2)
+ page.goto(base);expect(page.locator('.card')).to_have_count(20)
+ page.get_by_role('button',name='Finance',exact=True).click();expect(page.locator('.card')).to_have_count(3)
  page.locator('#search').fill('drawdown');expect(page.locator('.card')).to_have_count(1)
  page.locator('.card').click();expect(page.locator('h1')).to_have_text('Portfolio Drawdown')
  assert not page.locator('details.info').evaluate('el=>el.open')
@@ -55,7 +55,7 @@ with sync_playwright() as p:
  page.locator('details.info > summary').click()
  for link in page.locator('.info-content a').evaluate_all('(els)=>els.map(el=>el.getAttribute("href"))'):
   page.goto(base+link);assert page.locator('h1').inner_text() in ['Compound Interest','Exponential Growth & Decay']
- page.goto(base+'concept.html?concept=portfolio');page.locator('.back').click();expect(page.locator('.card')).to_have_count(19)
+ page.goto(base+'concept.html?concept=portfolio');page.locator('.back').click();expect(page.locator('.card')).to_have_count(20)
  for width in [320,390,768,1280]:
   page.set_viewport_size({'width':width,'height':900})
   for theme in ['light','dark']:

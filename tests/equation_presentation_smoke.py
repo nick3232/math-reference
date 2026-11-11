@@ -7,7 +7,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  page=browser.new_page(viewport={'width':390,'height':844});errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(base);links=page.locator('.card').evaluate_all('(els)=>els.map(el=>el.getAttribute("href"))');assert len(links)==19
+ page.goto(base);links=page.locator('.card').evaluate_all('(els)=>els.map(el=>el.getAttribute("href"))');assert len(links)==20
  equations={}
  for link in links:
   page.goto(base+link)
@@ -29,5 +29,5 @@ with sync_playwright() as p:
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(link,width,theme)
     assert page.locator('.equation-row').evaluate('el=>el.scrollWidth<=el.clientWidth')
  assert not errors,errors
- print('PASS: all 19 pages retain equations without copy controls, bottom directory, or external calculators; responsive in both themes'+('; expressions exactly match baseline' if baseline else ''))
+ print('PASS: all 20 pages retain equations without copy controls, bottom directory, or external calculators; responsive in both themes'+('; expressions exactly match baseline' if baseline else ''))
  browser.close()

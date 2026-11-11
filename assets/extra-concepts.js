@@ -9,7 +9,7 @@ export const extraConcepts = [
     equation: 'FV = PV(1 + r)<sup>t</sup>',
     what: 'With annual compounding, interest is added to the balance once each year. PV is the initial principal, r is the annual rate as a decimal, and t is the number of years.',
     useful: 'Comparing savings and long-term investment scenarios. This model assumes a constant rate, with no deposits, withdrawals, fees, or taxes.',
-    related: 'Exponential Growth & Decay · Derivatives'
+    related: 'Loan Amortization · Exponential Growth & Decay · Derivatives'
   },
   {
     id: 'derivatives', title: 'Derivatives', category: 'Functions',

@@ -13,7 +13,7 @@ with sync_playwright() as p:
  def snapshot():
   return page.evaluate("""()=>({points:[...document.querySelectorAll('.regression-point .selected-point')].map(el=>[el.getAttribute('cx'),el.getAttribute('cy')]),slope:document.querySelector('#regression-slope').textContent,equation:document.querySelector('#regression-slope').textContent==='Undefined'?null:'fit'})""")
  def numeric(id):return float(page.locator('#'+id).inner_text().replace(',',''))
- page.goto(base);assert page.locator('.card').count()==19
+ page.goto(base);assert page.locator('.card').count()==20
  for id,title in NEW.items():
   page.goto(base);page.locator('#search').fill(title);expect(page.locator('.card')).to_have_count(1)
   page.locator('.card').click();expect(page.locator('h1')).to_have_text(title)

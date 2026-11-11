@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 import os, shutil
 base=os.environ.get('MATH_REFERENCE_URL','http://localhost:8000/')
 baseline=os.environ.get('MATH_REFERENCE_BASELINE_URL')
-CASES=[('interest','principal'),('interest','rate'),('derivatives','point'),('trigonometric','amplitude'),('trigonometric','frequency'),('trigonometric','phase'),('unit-circle','angle'),('portfolio','portfolio-start'),('portfolio','portfolio-return'),('portfolio','portfolio-withdrawal'),('portfolio','portfolio-years'),('transformations','transform-h'),('transformations','transform-k'),('transformations','transform-a'),('transformations','transform-b')]
+CASES=[('interest','principal'),('interest','rate'),('derivatives','point'),('trigonometric','amplitude'),('trigonometric','frequency'),('trigonometric','phase'),('unit-circle','angle'),('portfolio','portfolio-start'),('portfolio','portfolio-return'),('portfolio','portfolio-withdrawal'),('portfolio','portfolio-years'),('transformations','transform-h'),('transformations','transform-k'),('transformations','transform-a'),('transformations','transform-b'),('amortization','loan-amount'),('amortization','loan-rate'),('amortization','loan-term'),('amortization','loan-year')]
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':390,'height':650},has_touch=True,is_mobile=True)
@@ -33,7 +33,8 @@ with sync_playwright() as p:
   # Horizontal movement commits after the threshold and emits continuous updates.
   control=prepare(concept,name);point=position(control,.2);before_scroll=page.evaluate('scrollY');value=control.input_value()
   page.evaluate("window.changes=[];document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',()=>changes.push(el.value)))")
-  graph_before=page.locator('.plot').get_attribute('aria-label')
+  graph_selector='.loan-bar' if name=='loan-year' else '.plot'
+  graph_before=page.locator(graph_selector).get_attribute('aria-label')
   start(point);assert control.input_value()==value
   move({'x':point['x']+2,'y':point['y']+1});assert control.input_value()==value
   target=position(control,.8)
@@ -41,7 +42,7 @@ with sync_playwright() as p:
    move({'x':point['x']+(target['x']-point['x'])*i/12,'y':point['y']});page.wait_for_timeout(16)
   end()
   assert control.input_value()!=value
-  assert page.locator('.plot').get_attribute('aria-label')!=graph_before
+  assert page.locator(graph_selector).get_attribute('aria-label')!=graph_before
   assert len(page.evaluate('changes'))>=5,(concept,name,'not continuously updating')
   assert page.evaluate('scrollY')==before_scroll
   attrs=control.evaluate('el=>({value:+el.value,min:+el.min,max:+el.max,step:+el.step})')
