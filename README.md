@@ -1,6 +1,6 @@
 # Math Reference
 
-A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes eighteen concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, and Expected Value. No dependencies or build step.
+A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes nineteen concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, and Function Transformations. No dependencies or build step.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 ## Structure
 
 - `index.html`: library entry point.
-- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, or `expected-value` selects the concept.
+- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, or `transformations` selects the concept.
 - `assets/styles.css`: responsive layouts, visualization styling, and automatic system light/dark themes.
 - `assets/app.js`: concept metadata, shared layout, search/category filtering, controls, SVG graphs, and network editor.
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
@@ -28,11 +28,12 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 - `assets/touch.js`: scoped SVG handle touch handling plus centralized direction-aware range gestures. Native inputs retain their appearance, constraints, labels, and keyboard accessibility.
 - `assets/portfolio.js`: Portfolio Drawdown metadata and two-series visualization; `assets/portfolio-model.js` contains the monthly simulation.
 - `assets/expected-value.js`: outcome editor, probability markers, expected-value summary, and collapsible breakdown; `assets/expected-value-model.js` normalizes weights and calculates full-precision contributions.
+- `assets/transformations.js`: function selector, stable transformation graph, and dynamic equations; `assets/transformations-model.js` contains base functions, transformed evaluations, and equation formatting.
 - `assets/charts.js`: shared responsive SVG coordinates, tick formatters, clipping, paths, metrics, and control initialization.
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
 - `tests/slider_touch_smoke.py`: vertical scroll protection, continuous horizontal adjustments, taps, keyboard/mouse interaction, and optional exact baseline checks for graph markup and range constraints.
-- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all eighteen mobile page layouts.
+- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all nineteen mobile page layouts.
 - `tests/applied_concepts_smoke.py`: Batch 4 calculations, edge states, regression mouse/touch dragging and keyboard editing, and four viewport widths in both themes.
 - `tests/new_concepts_smoke.py`: the Batch 3 visualizations, all-concept search/navigation, touch controls, and circle geometry; uses the same optional Playwright tooling.
 
@@ -76,6 +77,8 @@ Portfolio Drawdown models end-of-month withdrawals after a monthly return of r/1
 
 Expected Value supports 2–6 outcomes with finite numeric values and nonnegative decimal relative weights. The page starts with values −10, 0, 20 and relative weights 25, 35, 40 (expected value 5.50). Reset restores these three outcomes. Coin-toss and fair-die examples appear in the collapsed explanation rather than as interactive presets. Probabilities are normalized without rounding before calculation. Empty or invalid edits and all-zero weights show an undefined state; negative weights are clamped to zero. Duplicate values share a combined probability marker while their individual contributions remain separate. The dashed vertical line marks the expected value. Readouts normally show two decimals, using scientific notation for extreme magnitudes; displayed percentages may not sum to exactly 100% due to display rounding. Changes are session-only.
 
+Function Transformations compares quadratic, cubic, and absolute-value bases with g(x) = a f(b(x−h)) + k. Shift controls span −5–5 (step 0.5) and scales span −3–3 (step 0.25). The fixed window is x ∈ [−8, 8], y ∈ [−10, 10]; clipped curves remain mathematically continuous. Original curves are dashed and muted; transformed curves are solid and accented. Function switching retains parameters; Reset restores a = b = 1 and h = k = 0 while preserving the selected function. Either scale at zero produces g(x) = k. Horizontal scale magnitudes above 1 compress width; negative b reverses input about x = h, visually unchanged for the two even base functions.
+
 Concept pages return to the directory through **All concepts** near the top; related links remain in the collapsed explanation. Empty areas of the Unit Circle, network, and regression plots allow normal page scrolling. Only draggable points/vertices reserve touch gestures for manipulation.
 
 On touch-capable devices, a transparent hit layer over each native range waits for an 8px direction threshold. Vertical swipes use native page scrolling without committing a value; horizontal drags update the existing input continuously. Taps set a value on release. Native input min/max/step sanitization is retained; no mathematical calculations change. Fine-pointer desktops continue to use native mouse handling. The shared layer is needed because native range inputs can commit a value on touch-down even with `touch-action: pan-y`. Touch checks use Chromium emulation; physical iOS/Android device behavior has not been verified.
@@ -93,6 +96,7 @@ python3 tests/equation_presentation_smoke.py
 python3 tests/slider_touch_smoke.py
 python3 tests/portfolio_smoke.py
 python3 tests/expected_value_smoke.py
+python3 tests/transformations_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.

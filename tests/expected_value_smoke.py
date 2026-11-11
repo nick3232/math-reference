@@ -5,7 +5,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True)
  page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(base);expect(page.locator('.card')).to_have_count(18)
+ page.goto(base);expect(page.locator('.card')).to_have_count(19)
  page.locator('#search').fill('expected');expect(page.locator('.card')).to_have_count(1)
  page.locator('.card').click();expect(page.locator('h1')).to_have_text('Expected Value')
  def configure(pairs):

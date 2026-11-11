@@ -18,7 +18,7 @@ export const extraConcepts = [
     equation: ['f(x) = x²', 'f′(x) = 2x'],
     what: 'A derivative measures instantaneous rate of change. For f(x) = x², the tangent slope at x = a is 2a, and the tangent is y = a² + 2a(x − a).',
     useful: 'Understanding velocity, optimizing quantities, and measuring sensitivity in mathematical models.',
-    related: 'Sigmoid Function · Compound Interest · Limits'
+    related: 'Function Transformations · Sigmoid Function · Compound Interest · Limits'
   },
   {
     id: 'coins', title: 'Probability & Coin Flips', category: 'Probability & Statistics',

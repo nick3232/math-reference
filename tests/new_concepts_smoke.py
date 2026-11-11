@@ -15,7 +15,7 @@ with sync_playwright() as p:
  def visit(concept):page.goto(base+'concept.html?concept='+concept)
  def set_slider(name,value):page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',str(value))
  page.goto(base)
- titles=page.locator('.card h3').all_text_contents();assert len(titles)==18
+ titles=page.locator('.card h3').all_text_contents();assert len(titles)==19
  # Search and real navigation for all eleven, plus working related links.
  for title in titles:
   page.goto(base);page.locator('#search').fill(title);expect(page.locator('.card')).to_have_count(1)
@@ -102,5 +102,5 @@ with sync_playwright() as p:
      box=page.locator('.unit-outline').bounding_box();assert abs(box['width']-box['height'])<.01
     if width==390:page.screenshot(path='/tmp/math-'+concept+'-'+scheme+'.png',full_page=True)
  assert not errors,errors
- print('PASS: eighteen-concept search/navigation; all five new interactions and  mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
+ print('PASS: nineteen-concept search/navigation; all five new interactions and  mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
  browser.close()
