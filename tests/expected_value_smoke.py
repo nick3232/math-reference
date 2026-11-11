@@ -8,9 +8,30 @@ with sync_playwright() as p:
  page.goto(base);expect(page.locator('.card')).to_have_count(18)
  page.locator('#search').fill('expected');expect(page.locator('.card')).to_have_count(1)
  page.locator('.card').click();expect(page.locator('h1')).to_have_text('Expected Value')
- expect(page.locator('#ev-result')).to_have_text('5.50')
- assert page.locator('.ev-outcome').count()==3
+ def configure(pairs):
+  page.locator('#ev-reset').click()
+  while page.locator('.ev-outcome').count()<len(pairs):page.locator('#ev-add').click()
+  while page.locator('.ev-outcome').count()>len(pairs):page.locator('[data-remove]').last.click()
+  for i,(value,weight) in enumerate(pairs):
+   page.locator('#ev-value-'+str(i)).fill(str(value))
+   page.locator('#ev-weight-'+str(i)).fill(str(weight))
+ def assert_defaults():
+  assert page.locator('.ev-outcome').count()==3
+  for i,(value,weight) in enumerate([(-10,25),(0,35),(20,40)]):
+   expect(page.locator('#ev-value-'+str(i))).to_have_value(str(value))
+   expect(page.locator('#ev-weight-'+str(i))).to_have_value(str(weight))
+  expect(page.locator('#ev-result')).to_have_text('5.50')
+ assert_defaults()
+ assert page.locator('select,#ev-example').count()==0
  assert not page.locator('details.info').evaluate('el=>el.open')
+ page.locator('details.info > summary').click()
+ info=page.locator('details.info .info-content')
+ expect(info.get_by_text('Coin Toss — Outcomes Can Cancel',exact=True)).to_be_visible()
+ expect(info.get_by_text('Six-Sided Die — Expected Value May Not Be a Possible Outcome',exact=True)).to_be_visible()
+ assert 'neither outcome is zero' in info.inner_text()
+ assert '3.5 is not a possible individual outcome' in info.inner_text()
+ assert 'Coin Toss — Outcomes Can Cancel' not in page.locator('.workspace').inner_text()
+ page.locator('details.info > summary').click()
  assert not page.locator('.ev-breakdown').evaluate('el=>el.open')
  assert page.locator('#copy,.other-nav,a[href*="desmos"]').count()==0
  assert [page.locator('#ev-prob-'+str(i)).inner_text() for i in range(3)]==['25%','35%','40%']
@@ -22,18 +43,17 @@ with sync_playwright() as p:
  positions=[float(re.match(r'M([^ ]+) ',el.get_attribute('d')).group(1)) for el in page.locator('.ev-stem').all()]
  assert abs(mean_x()-(positions[0]+(5.5+10)/30*(positions[2]-positions[0])))<1e-7
  page.locator('#ev-weight-0').fill('50')
- expect(page.locator('#ev-example')).to_have_value('custom')
  assert [page.locator('#ev-prob-'+str(i)).inner_text() for i in range(3)]==['40%','28%','32%']
  assert marker!=page.locator('.ev-mean').get_attribute('d')
  for i in range(3):page.locator('#ev-weight-'+str(i)).fill('0')
  expect(page.locator('#ev-result')).to_have_text('Undefined')
  expect(page.locator('#ev-status')).to_have_text('At least one positive weight is required.')
  assert page.locator('.ev-mean').count()==0
- page.locator('#ev-example').select_option('die');expect(page.locator('#ev-result')).to_have_text('3.50')
+ configure([(i,1) for i in range(1,7)]);expect(page.locator('#ev-result')).to_have_text('3.50')
  assert page.locator('.ev-marker').count()==6;expect(page.locator('#ev-add')).to_be_disabled()
- page.locator('#ev-example').select_option('coin');expect(page.locator('#ev-result')).to_have_text('0.00')
+ configure([(-1,1),(1,1)]);expect(page.locator('#ev-result')).to_have_text('0.00')
  assert page.locator('[data-remove]:disabled').count()==2
- page.locator('#ev-add').click();expect(page.locator('#ev-example')).to_have_value('custom')
+ page.locator('#ev-add').click()
  expect(page.locator('#ev-value-2')).to_have_value('0');expect(page.locator('#ev-weight-2')).to_have_value('1')
  page.locator('#ev-value-0').fill('0');page.locator('#ev-value-1').fill('0')
  assert page.locator('.ev-marker').count()==1
@@ -46,7 +66,7 @@ with sync_playwright() as p:
  page.locator('#ev-value-0').fill('2');page.locator('#ev-weight-0').fill('-5')
  expect(page.locator('#ev-weight-0')).to_have_value('0')
  page.locator('#ev-value-0').fill('1e309');expect(page.locator('#ev-result')).to_have_text('Undefined')
- page.locator('#ev-reset').click();expect(page.locator('#ev-result')).to_have_text('5.50')
+ page.locator('#ev-reset').click();assert_defaults()
  for _ in range(3):page.locator('#ev-add').click()
  assert page.locator('.ev-outcome').count()==6;expect(page.locator('#ev-add')).to_be_disabled()
  for _ in range(4):page.locator('[data-remove]').last.click()
@@ -63,12 +83,12 @@ with sync_playwright() as p:
   page.set_viewport_size({'width':width,'height':900})
   for theme in ['light','dark']:
    page.emulate_media(color_scheme=theme);page.locator('#ev-reset').click()
-   for preset in ['three','die','coin']:
-    page.locator('#ev-example').select_option(preset)
-    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,theme,preset)
+   for pairs in [[(-10,25),(0,35),(20,40)],[(i,1) for i in range(1,7)],[(-1,1),(1,1)]]:
+    configure(pairs)
+    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,theme,pairs)
     assert page.locator('.equation-row').evaluate('el=>el.scrollWidth<=el.clientWidth')
    page.locator('#ev-reset').click()
    if width==390:page.screenshot(path='/tmp/expected-value-'+theme+'.png',full_page=True)
  assert not errors,errors
- print('PASS: Expected Value presets, weight normalization, marker geometry, duplicate values, decimals, invalid/empty/zero states, outcome limits, reset, and responsive light/dark layouts')
+ print('PASS: Expected Value defaults/reset, manual configurations, educational examples, weight normalization, marker geometry, duplicate values, decimals, invalid/empty/zero states, outcome limits, reset, and responsive light/dark layouts')
  browser.close()

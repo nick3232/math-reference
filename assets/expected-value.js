@@ -6,13 +6,11 @@ export const expectedValueConcept = {
   intro:'Explore the probability-weighted average of possible numerical outcomes.',
   description:'Change outcomes and relative weights to see their weighted average.',
   equation:['E[X] = Σ pᵢxᵢ', 'pᵢ = wᵢ / Σwᵢ', 'Σpᵢ = 1'],
-  what:'Each outcome value xᵢ contributes pᵢxᵢ to the average. Nonnegative relative weights wᵢ become probabilities by dividing by total weight. More probable outcomes influence the average more; negative outcomes pull it downward. Expected value need not be a possible outcome or the most likely one: a fair die has expected value 3.5, and equal −1/+1 coin outcomes average to 0.',
+  what:'Each outcome value xᵢ contributes pᵢxᵢ to the average. Nonnegative relative weights wᵢ become probabilities by dividing by total weight. More probable outcomes influence the average more; negative outcomes pull it downward. The result is not necessarily the most likely outcome.<br><br><strong>Coin Toss — Outcomes Can Cancel</strong><br>For equally likely outcomes valued at −1 and +1, the expected value is zero. Their contributions cancel, even though neither outcome is zero.<br><br><strong>Six-Sided Die — Expected Value May Not Be a Possible Outcome</strong><br>A fair die with outcomes 1 through 6 has expected value 3.5. A single roll can only produce a whole number from 1 to 6, so 3.5 is not a possible individual outcome.',
   useful:'Comparing experiments, games, and uncertain decisions. Over many independent trials with the same distribution, the average tends toward the expected value; any individual outcome can differ. This long-run average does not describe all the variability or guarantee a single result.',
   related:'Probability & Coin Flips · Binomial Distribution · Normal Distribution'
 };
-const presets = {
-  three:[[-10,25],[0,35],[20,40]], die:[[1,1],[2,1],[3,1],[4,1],[5,1],[6,1]], coin:[[-1,1],[1,1]]
-};
+const defaultOutcomes = [[-10,25],[0,35],[20,40]];
 const $=selector=>document.querySelector(selector);
 const format = value => Math.abs(value)>=1e9 || (value!==0&&Math.abs(value)<.00001) ? value.toExponential(2) : value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const percent = value => (value*100).toLocaleString('en-US',{maximumFractionDigits:1})+'%';
@@ -26,8 +24,8 @@ const scaledTick = (value,scale) => {
 };
 
 export function initExpectedValue() {
-  let rows=presets.three.map(([value,weight])=>({value:String(value),weight:String(weight)}));
-  $('#controls').innerHTML=`<div class="network-tools ev-toolbar"><label for="ev-example">Example</label><select id="ev-example"><option value="three">Three Outcomes</option><option value="die">Fair Six-Sided Die</option><option value="coin">Coin Toss</option><option value="custom">Custom</option></select><button id="ev-reset">Reset</button></div><div id="ev-outcomes"></div><div class="network-tools"><button id="ev-add">Add outcome</button></div><details class="ev-breakdown"><summary>Calculation breakdown</summary><div id="ev-calculation"></div></details>`;
+  let rows=defaultOutcomes.map(([value,weight])=>({value:String(value),weight:String(weight)}));
+  $('#controls').innerHTML=`<div class="network-tools"><button id="ev-reset">Reset</button></div><div id="ev-outcomes"></div><div class="network-tools"><button id="ev-add">Add outcome</button></div><details class="ev-breakdown"><summary>Calculation breakdown</summary><div id="ev-calculation"></div></details>`;
   const summary=document.createElement('div');summary.className='ev-summary';
   summary.innerHTML='<div class="metrics"><div><span>Expected Value</span><output id="ev-result" aria-live="polite"></output></div></div><p class="status">Probability-weighted average outcome.</p><p class="status" id="ev-status" role="status"></p><div class="chart-legend"><span class="interest-key">Outcome probabilities · equal values combined</span><span class="reference-key">Expected value · dashed</span></div>';
   $('.plot').after(summary);
@@ -76,15 +74,13 @@ export function initExpectedValue() {
     const input=event.target;if(!input.matches('input[data-index]'))return;
     if(input.dataset.field==='weight'&&input.value!==''&&Number(input.value)<0)input.value='0';
     rows[+input.dataset.index][input.dataset.field]=input.value;
-    $('#ev-example').value='custom';update();
+    update();
   });
   $('#ev-outcomes').addEventListener('click',event=>{
     const button=event.target.closest('[data-remove]');if(!button||rows.length<=2)return;
-    const index=+button.dataset.remove;rows.splice(index,1);$('#ev-example').value='custom';renderRows(Math.min(index,rows.length-1));
+    const index=+button.dataset.remove;rows.splice(index,1);renderRows(Math.min(index,rows.length-1));
   });
-  $('#ev-add').onclick=()=>{if(rows.length>=6)return;rows.push({value:'0',weight:'1'});$('#ev-example').value='custom';renderRows(rows.length-1);};
-  const load=key=>{rows=presets[key].map(([value,weight])=>({value:String(value),weight:String(weight)}));$('#ev-example').value=key;renderRows();};
-  $('#ev-example').onchange=()=>{if(presets[$('#ev-example').value])load($('#ev-example').value);};
-  $('#ev-reset').onclick=()=>load('three');
+  $('#ev-add').onclick=()=>{if(rows.length>=6)return;rows.push({value:'0',weight:'1'});renderRows(rows.length-1);};
+  $('#ev-reset').onclick=()=>{rows=defaultOutcomes.map(([value,weight])=>({value:String(value),weight:String(weight)}));renderRows();};
   renderRows();new ResizeObserver(update).observe($('.plot'));
 }
