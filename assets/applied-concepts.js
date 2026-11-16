@@ -16,7 +16,7 @@ export const appliedConcepts = [
     equation:['A + B = R', 'Rₓ = Aₓ + Bₓ', 'Rᵧ = Aᵧ + Bᵧ'],
     what:'A vector has magnitude and direction. Resolve each vector into x and y components, then add matching components. The dashed copy of B starts at the tip of A; the resultant joins the origin to its final tip. A zero resultant has no defined direction.',
     useful:'Combining forces, velocities, displacements, and two-dimensional movement.',
-    related:'Unit Circle · Trigonometric Functions'},
+    related:'Dot Product · Unit Circle · Trigonometric Functions'},
   {id:'regression',title:'Linear Regression',category:'Probability & Statistics',
     intro:'Move data points and see how a least-squares line responds.',
     description:'Fit a line, inspect residuals, and explore correlation.',
