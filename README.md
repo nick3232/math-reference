@@ -1,6 +1,6 @@
 # Math Reference
 
-A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes twenty-one concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, Function Transformations, Loan Amortization, and Dot Product. No dependencies or build step.
+A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes twenty-two concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, Function Transformations, Loan Amortization, Dot Product, and Determinant & Area. No dependencies or build step.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 ## Structure
 
 - `index.html`: library entry point.
-- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, `transformations`, `amortization`, or `dot-product` selects the concept.
+- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, `transformations`, `amortization`, `dot-product`, or `determinant` selects the concept.
 - `assets/styles.css`: responsive layouts, visualization styling, and automatic system light/dark themes.
 - `assets/app.js`: concept metadata, shared layout, search/category filtering, controls, SVG graphs, and network editor.
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
@@ -31,11 +31,12 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 - `assets/transformations.js`: function selector, stable transformation graph, and dynamic equations; `assets/transformations-model.js` contains base functions, transformed evaluations, and equation formatting.
 - `assets/amortization.js`: loan summaries, balance graph, and selected-year payment breakdown; `assets/amortization-model.js` calculates fixed monthly payments and annual/monthly schedules.
 - `assets/dot-product.js`: unit-vector diagram, shortcut angles, and live component/geometric calculations; `assets/dot-product-model.js` computes the unit-vector dot product with exact cardinal-angle cleanup.
+- `assets/determinant.js`: unit-column parallelogram, orientation/area readouts, shortcuts and live calculation; `assets/determinant-model.js` computes signed determinants and geometric areas.
 - `assets/charts.js`: shared responsive SVG coordinates, tick formatters, clipping, paths, metrics, and control initialization.
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
 - `tests/slider_touch_smoke.py`: vertical scroll protection, continuous horizontal adjustments, taps, keyboard/mouse interaction, and optional exact baseline checks for graph markup and range constraints.
-- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all twenty-one mobile page layouts.
+- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all twenty-two mobile page layouts.
 - `tests/applied_concepts_smoke.py`: Batch 4 calculations, edge states, regression mouse/touch dragging and keyboard editing, and four viewport widths in both themes.
 - `tests/new_concepts_smoke.py`: the Batch 3 visualizations, all-concept search/navigation, touch controls, and circle geometry; uses the same optional Playwright tooling.
 
@@ -85,6 +86,8 @@ Loan Amortization supports $10,000–$1,000,000 principal (step $10,000), 0%–1
 
 Dot Product uses fixed a = (1, 0) and rotating b = (cos θ, sin θ), both unit length. Its only slider spans 0°–180° with 1° steps and defaults to 60°. Three shortcut buttons set 0°, 90°, or 180°; Reset returns to 60°. The diagram uses equal x/y scaling; overlapping arrows at 0° retain distinct widths and arrowhead sizes. The live panel compares the component formula with the geometric formula. Values use three decimals, with a 1e−12 tolerance removing floating-point residue at perpendicular and endpoint angles. No dragging or additional vector controls are provided.
 
+Determinant & Area fixes a = (1, 0) and rotates unit vector b through 0°–360° in 1° steps, defaulting to 60°. Shortcuts select 0°, 90°, 180°, and 270°; Reset restores 60°. The parallelogram vertices are 0, a, a+b, b. A fixed, equally scaled SVG window contains the entire parallelogram through a full rotation. The determinant is sin θ; geometric area is its absolute value. Cardinal-angle residue is removed using the existing 1e−12 tolerance. The live calculation and collapsed explanation connect column vectors, signed area, area scaling, singularity, and orientation; there is no matrix editor.
+
 Concept pages return to the directory through **All concepts** near the top; related links remain in the collapsed explanation. Empty areas of the Unit Circle, network, and regression plots allow normal page scrolling. Only draggable points/vertices reserve touch gestures for manipulation.
 
 On touch-capable devices, a transparent hit layer over each native range waits for an 8px direction threshold. Vertical swipes use native page scrolling without committing a value; horizontal drags update the existing input continuously. Taps set a value on release. Native input min/max/step sanitization is retained; no mathematical calculations change. Fine-pointer desktops continue to use native mouse handling. The shared layer is needed because native range inputs can commit a value on touch-down even with `touch-action: pan-y`. Touch checks use Chromium emulation; physical iOS/Android device behavior has not been verified.
@@ -105,6 +108,7 @@ python3 tests/expected_value_smoke.py
 python3 tests/transformations_smoke.py
 python3 tests/amortization_smoke.py
 python3 tests/dot_product_smoke.py
+python3 tests/determinant_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.

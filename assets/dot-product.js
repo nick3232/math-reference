@@ -7,7 +7,7 @@ export const dotProductConcept = {
   equation:'a · b = |a||b| cos θ = aₓbₓ + aᵧbᵧ',
   what:'The dot product combines two vectors into a single number, a scalar. Algebraically, a · b = aₓbₓ + aᵧbᵧ: multiply corresponding components and add. Geometrically, a · b = |a||b| cos θ, so it measures alignment and also depends on both magnitudes. Acute angles give positive results, perpendicular vectors give zero, and obtuse angles give negative results. Here both lengths are 1 and a = (1, 0), isolating the angle so a · b = cos θ. General vectors need not have unit length or align with the axes.',
   useful:'Vector projections, determining perpendicularity, directional similarity, computer graphics, and physics. Cosine similarity in machine learning compares directions by normalizing the dot product with the vector magnitudes; for unit vectors it equals their dot product.',
-  related:'Vector Addition · Unit Circle · Trigonometric Functions'
+  related:'Determinant & Area · Vector Addition · Unit Circle · Trigonometric Functions'
 };
 const $=selector=>document.querySelector(selector);
 const format=value=>(Math.abs(value)<1e-12?0:value).toFixed(3).replace('-','−');
