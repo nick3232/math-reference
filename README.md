@@ -1,6 +1,6 @@
 # Math Reference
 
-A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes twenty-two concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, Function Transformations, Loan Amortization, Dot Product, and Determinant & Area. No dependencies or build step.
+A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes twenty-three concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, Function Transformations, Loan Amortization, Dot Product, Determinant & Area, and Polar Coordinates. No dependencies or build step.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 ## Structure
 
 - `index.html`: library entry point.
-- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, `transformations`, `amortization`, `dot-product`, or `determinant` selects the concept.
+- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, `transformations`, `amortization`, `dot-product`, `determinant`, or `polar` selects the concept.
 - `assets/styles.css`: responsive layouts, visualization styling, and automatic system light/dark themes.
 - `assets/app.js`: concept metadata, shared layout, search/category filtering, controls, SVG graphs, and network editor.
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
@@ -31,12 +31,13 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 - `assets/transformations.js`: function selector, stable transformation graph, and dynamic equations; `assets/transformations-model.js` contains base functions, transformed evaluations, and equation formatting.
 - `assets/amortization.js`: loan summaries, balance graph, and selected-year payment breakdown; `assets/amortization-model.js` calculates fixed monthly payments and annual/monthly schedules.
 - `assets/dot-product.js`: unit-vector diagram, shortcut angles, and live component/geometric calculations; `assets/dot-product-model.js` computes the unit-vector dot product with exact cardinal-angle cleanup.
+- `assets/polar.js`: polar-to-Cartesian model and fixed square polar grid, shared sliders, angle shortcuts, and live coordinate conversion.
 - `assets/determinant.js`: unit-column parallelogram, orientation/area readouts, shortcuts and live calculation; `assets/determinant-model.js` computes signed determinants and geometric areas.
 - `assets/charts.js`: shared responsive SVG coordinates, tick formatters, clipping, paths, metrics, and control initialization.
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
 - `tests/slider_touch_smoke.py`: vertical scroll protection, continuous horizontal adjustments, taps, keyboard/mouse interaction, and optional exact baseline checks for graph markup and range constraints.
-- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all twenty-two mobile page layouts.
+- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all twenty-three mobile page layouts.
 - `tests/applied_concepts_smoke.py`: Batch 4 calculations, edge states, regression mouse/touch dragging and keyboard editing, and four viewport widths in both themes.
 - `tests/new_concepts_smoke.py`: the Batch 3 visualizations, all-concept search/navigation, touch controls, and circle geometry; uses the same optional Playwright tooling.
 
@@ -92,6 +93,8 @@ Concept pages return to the directory through **All concepts** near the top; rel
 
 On touch-capable devices, a transparent hit layer over each native range waits for an 8px direction threshold. Vertical swipes use native page scrolling without committing a value; horizontal drags update the existing input continuously. Taps set a value on release. Native input min/max/step sanitization is retained; no mathematical calculations change. Fine-pointer desktops continue to use native mouse handling. The shared layer is needed because native range inputs can commit a value on touch-down even with `touch-action: pan-y`. Touch checks use Chromium emulation; physical iOS/Android device behavior has not been verified.
 
+Polar Coordinates uses nonnegative radius 0–5 (step 0.1, default 3) and angle 0°–360° (step 1°, default 45°). The fixed square SVG grid has five concentric circles and 30° radial guides. Cardinal-angle components are snapped using the shared tolerance; radius zero always maps to the origin. Two sliders and four angle shortcuts update the point, projections, readouts and live conversion immediately; Reset restores both defaults. No dragging or reverse conversion controls are included.
+
 ## Checks
 
 ```sh
@@ -109,6 +112,7 @@ python3 tests/transformations_smoke.py
 python3 tests/amortization_smoke.py
 python3 tests/dot_product_smoke.py
 python3 tests/determinant_smoke.py
+python3 tests/polar_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.
