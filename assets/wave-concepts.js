@@ -19,7 +19,7 @@ export const waveConcepts = [
     equation:'y = A e<sup>kx</sup>',
     what:'A is the initial value at x = 0. Positive k produces growth, negative k produces decay, and k = 0 gives the constant A. For k > 0 the doubling time is ln(2)/k; for k < 0 the half-life is ln(2)/|k|.',
     useful:'Population models, radioactive decay, continuous compounding, and the spread or fading of quantities over time.',
-    related:'Compound Interest · Logarithmic Functions · Derivatives'
+    related:'Compound Interest · Inflation & Purchasing Power · Logarithmic Functions · Derivatives'
   },
   {
     id:'logarithmic', title:'Logarithmic Functions', category:'Functions',

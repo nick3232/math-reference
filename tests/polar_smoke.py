@@ -5,7 +5,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  page=browser.new_page(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(base);expect(page.locator('.card')).to_have_count(23)
+ page.goto(base);expect(page.locator('.card')).to_have_count(24)
  page.get_by_role('button',name='Functions',exact=True).click();page.locator('#search').fill('Polar Coordinates');expect(page.locator('.card')).to_have_count(1);page.locator('.card').click()
  expect(page.locator('h1')).to_have_text('Polar Coordinates')
  assert page.locator('input,select').count()==2
