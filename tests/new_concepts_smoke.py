@@ -15,11 +15,13 @@ with sync_playwright() as p:
  def visit(concept):page.goto(base+'concept.html?concept='+concept)
  def set_slider(name,value):page.locator('#'+name).evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"))}',str(value))
  page.goto(base)
- titles=page.locator('.card h3').all_text_contents();assert len(titles)==24
- # Search and real navigation for all eleven, plus working related links.
+ titles=page.locator('.card h3').all_text_contents();assert len(titles)==25
+ # Search and real navigation for every concept, plus working related links.
  for title in titles:
-  page.goto(base);page.locator('#search').fill(title);expect(page.locator('.card')).to_have_count(1)
-  page.locator('.card').click();expect(page.locator('h1')).to_have_text(title)
+  page.goto(base);page.locator('#search').fill(title)
+  # A title can also match a category (Graph Theory now contains two pages).
+  match=page.locator('.card').filter(has=page.get_by_role('heading',name=title,exact=True));expect(match).to_have_count(1)
+  match.click();expect(page.locator('h1')).to_have_text(title)
   assert page.locator('.other-nav').count()==0
   assert not page.locator('details.info').evaluate('(el)=>el.open')
   page.locator('details.info > summary').click()
@@ -102,5 +104,5 @@ with sync_playwright() as p:
      box=page.locator('.unit-outline').bounding_box();assert abs(box['width']-box['height'])<.01
     if width==390:page.screenshot(path='/tmp/math-'+concept+'-'+scheme+'.png',full_page=True)
  assert not errors,errors
- print('PASS: twenty-four-concept search/navigation; all five new interactions and  mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
+ print('PASS: twenty-five-concept search/navigation; all five new interactions and  mathematical boundaries; touch sliders and circle drag; circle aspect ratio and light/dark layouts at 320/390/768/1280px; no JS errors')
  browser.close()

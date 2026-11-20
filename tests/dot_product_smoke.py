@@ -6,7 +6,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),headless=True,args=['--no-sandbox'])
  page=browser.new_page(viewport={'width':390,'height':844},has_touch=True,is_mobile=True)
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(base);expect(page.locator('.card')).to_have_count(24)
+ page.goto(base);expect(page.locator('.card')).to_have_count(25)
  page.get_by_role('button',name='Linear Algebra',exact=True).click();expect(page.locator('.card')).to_have_count(3)
  page.locator('#search').fill('dot product');expect(page.locator('.card')).to_have_count(1)
  page.locator('.card').click();expect(page.locator('h1')).to_have_text('Dot Product')

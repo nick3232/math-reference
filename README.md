@@ -1,6 +1,6 @@
 # Math Reference
 
-A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes twenty-four concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, Function Transformations, Loan Amortization, Dot Product, Determinant & Area, Polar Coordinates, and Inflation & Purchasing Power. No dependencies or build step.
+A mobile-first interactive mathematical reference library built with HTML, CSS, and vanilla JavaScript. Includes twenty-five concepts: Sigmoid Function, Normal Distribution, Graph Theory, Compound Interest, Derivatives, Probability & Coin Flips, Trigonometric Functions, Exponential Growth & Decay, Logarithmic Functions, Binomial Distribution, Unit Circle, Integration & Riemann Sums, Vector Addition, Linear Regression, Bayes' Theorem, Logistic Growth, Portfolio Drawdown, Expected Value, Function Transformations, Loan Amortization, Dot Product, Determinant & Area, Polar Coordinates, Inflation & Purchasing Power, and Shortest Path. No dependencies or build step.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 ## Structure
 
 - `index.html`: library entry point.
-- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, `transformations`, `amortization`, `dot-product`, `determinant`, `polar`, or `inflation` selects the concept.
+- `concept.html`: reusable concept-page entry point; `?concept=sigmoid`, `normal`, `graph`, `interest`, `derivatives`, `coins`, `trigonometric`, `exponential`, `logarithmic`, `binomial`, `unit-circle`, `integration`, `vectors`, `regression`, `bayes`, `logistic`, `portfolio`, `expected-value`, `transformations`, `amortization`, `dot-product`, `determinant`, `polar`, `inflation`, or `shortest-path` selects the concept.
 - `assets/styles.css`: responsive layouts, visualization styling, and automatic system light/dark themes.
 - `assets/app.js`: concept metadata, shared layout, search/category filtering, controls, SVG graphs, and network editor.
 - `assets/extra-concepts.js`: metadata and visualizations for compound interest, derivatives, and coin flips.
@@ -31,6 +31,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 - `assets/transformations.js`: function selector, stable transformation graph, and dynamic equations; `assets/transformations-model.js` contains base functions, transformed evaluations, and equation formatting.
 - `assets/amortization.js`: loan summaries, balance graph, and selected-year payment breakdown; `assets/amortization-model.js` calculates fixed monthly payments and annual/monthly schedules.
 - `assets/dot-product.js`: unit-vector diagram, shortcut angles, and live component/geometric calculations; `assets/dot-product-model.js` computes the unit-vector dot product with exact cardinal-angle cleanup.
+- `assets/shortest-path.js`: fixed weighted network, destination buttons, stored configuration cycle, and primary/alternative route presentation; `assets/shortest-path-model.js` computes shortest routes with Dijkstra and predecessor reconstruction.
 - `assets/inflation.js`: fixed-scale purchasing-power chart, selected-year marker, readouts and live calculation; `assets/inflation-model.js` contains reciprocal purchasing-power and future-cost calculations.
 - `assets/polar.js`: polar-to-Cartesian model and fixed square polar grid, shared sliders, angle shortcuts, and live coordinate conversion.
 - `assets/determinant.js`: unit-column parallelogram, orientation/area readouts, shortcuts and live calculation; `assets/determinant-model.js` computes signed determinants and geometric areas.
@@ -38,7 +39,7 @@ Push the site to GitHub. In **Settings → Pages**, select **Deploy from a branc
 - `assets/math.js`: mathematical functions and graph export helpers.
 - `tests/math.test.mjs`: dependency-free numerical and graph data checks (Node.js 22+).
 - `tests/slider_touch_smoke.py`: vertical scroll protection, continuous horizontal adjustments, taps, keyboard/mouse interaction, and optional exact baseline checks for graph markup and range constraints.
-- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all twenty-four mobile page layouts.
+- `tests/browser_smoke.py`: regression browser checks for the original six concepts and all twenty-five mobile page layouts.
 - `tests/applied_concepts_smoke.py`: Batch 4 calculations, edge states, regression mouse/touch dragging and keyboard editing, and four viewport widths in both themes.
 - `tests/new_concepts_smoke.py`: the Batch 3 visualizations, all-concept search/navigation, touch controls, and circle geometry; uses the same optional Playwright tooling.
 
@@ -98,6 +99,8 @@ Polar Coordinates uses nonnegative radius 0–5 (step 0.1, default 3) and angle 
 
 Inflation & Purchasing Power fixes the starting amount at $100 and compounds constant annual inflation. Two shared sliders select inflation 0%–10% (step 0.5, default 3%) and year 0–30 (default 15). The one-curve chart has fixed 0–30 year and $0–$100 axes; changing the selected year moves the marker without replacing the curve. Readouts distinguish purchasing power from future basket cost, and the live calculation shows the purchasing-power loss. There are no investment returns or variable inflation scenarios.
 
+Shortest Path uses six fixed nodes and ten undirected edges, with A always the start. Five destination buttons and Shuffle Weights explore three stored positive-weight configurations in a deterministic cycle. Dijkstra computes distances; predecessor sets reconstruct all optimal paths, with lexicographic tie-breaking for the primary and displayed alternative. Shared edges remain solid teal, while edges unique to the displayed alternative are dashed purple. The supplied Baseline weights give A → C → E → F, cost 12 over 3 connections. Equal-Cost Paths has **three** minimum-cost routes to F at cost 8: A → B → D → F, A → B → E → F, and A → C → E → F. The panel reports the total and shows one alternative. Reset restores Baseline and F. No dragging, weight editing, random generation, or algorithm animation is included.
+
 ## Checks
 
 ```sh
@@ -117,6 +120,7 @@ python3 tests/dot_product_smoke.py
 python3 tests/determinant_smoke.py
 python3 tests/polar_smoke.py
 python3 tests/inflation_smoke.py
+python3 tests/shortest_path_smoke.py
 ```
 
 The numerical checks require no package installation. To repeat the automated browser checks, install Python Playwright in your development tooling, start the local server, and run `python3 tests/browser_smoke.py`. It uses an installed Chromium browser (or Playwright’s bundled Chromium); set `CHROMIUM_PATH` to override the browser or `MATH_REFERENCE_URL` to override the server URL. Playwright is test tooling only and is not a site dependency.
